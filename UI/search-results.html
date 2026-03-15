@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - AI Hypermarket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: #1976d2;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.7rem 3rem 0.7rem 1rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+        }
+
+        .search-bar button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        nav {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .search-info {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .search-info h1 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .filter-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-section h3 {
+            color: #1976d2;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .filter-option {
+            padding: 0.5rem 0;
+        }
+
+        .filter-option label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .filter-option input {
+            margin-right: 0.5rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 150px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 3rem;
+        }
+
+        .product-info h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .product-price {
+            color: #1976d2;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .dietary-info {
+            font-size: 0.85rem;
+            color: #4caf50;
+            margin-bottom: 0.5rem;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 0.7rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .add-to-cart:hover {
+            background: #1565c0;
+        }
+
+        .sort-bar {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .sort-bar select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .ai-match {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="window.location.href='home.html'">AI Hypermarket</div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products..." value="vegetarian">
+                <button>Search</button>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="#">Products</a></li>
+                <li><a href="#">Festival Specials</a></li>
+                <li><a href="#">Deals & Promotions</a></li>
+                <li><a href="#">My Lists</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="search-info">
+            <h1>Search Results for "vegetarian"</h1>
+            <p>Found 24 products matching your preferences (Vegetarian, Gluten-Free)</p>
+        </div>
+
+        <div class="results-layout">
+            <div class="filters">
+                <h3>🔍 Filters</h3>
+                
+                <div class="filter-section">
+                    <h3>Category</h3>
+                    <div class="filter-option">
+                        <label><input type="checkbox" checked> Fresh Produce</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> Pantry Items</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> Frozen Foods</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> Snacks</label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Dietary</h3>
+                    <div class="filter-option">
+                        <label><input type="checkbox" checked> Vegetarian</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" checked> Gluten-Free</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> Vegan</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> Organic</label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Price Range</h3>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> Under $5</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> $5 - $10</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> $10 - $20</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox"> Over $20</label>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="sort-bar">
+                    <span><strong>24 Products</strong></span>
+                    <select>
+                        <option>AI Recommended</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Name: A to Z</option>
+                        <option>Newest First</option>
+                    </select>
+                </div>
+
+                <div class="results-grid">
+                    <div class="product-card" onclick="window.location.href='product-detail.html'">
+                        <div class="ai-match">AI Match 95%</div>
+                        <div class="product-image">🥗</div>
+                        <div class="product-info">
+                            <h4>Organic Salad Mix</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$4.99</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <div class="ai-match">AI Match 92%</div>
+                        <div class="product-image">🌾</div>
+                        <div class="product-info">
+                            <h4>Quinoa Pasta</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$7.99</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <div class="ai-match">AI Match 90%</div>
+                        <div class="product-image">🥑</div>
+                        <div class="product-info">
+                            <h4>Fresh Avocados</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$5.99</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <div class="ai-match">AI Match 88%</div>
+                        <div class="product-image">🥜</div>
+                        <div class="product-info">
+                            <h4>Almond Butter</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$9.99</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <div class="product-image">🍅</div>
+                        <div class="product-info">
+                            <h4>Cherry Tomatoes</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$3.99</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <div class="product-image">🥦</div>
+                        <div class="product-info">
+                            <h4>Organic Broccoli</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$2.99</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <div class="product-image">🍠</div>
+                        <div class="product-info">
+                            <h4>Sweet Potatoes</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$4.49</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <div class="product-image">🫑</div>
+                        <div class="product-info">
+                            <h4>Bell Peppers Mix</h4>
+                            <div class="dietary-info">✓ Vegetarian ✓ Gluten-Free</div>
+                            <div class="product-price">$5.49</div>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 AI Hypermarket. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

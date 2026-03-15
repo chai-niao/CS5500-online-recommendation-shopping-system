@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - AI Hypermarket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: #1976d2;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .progress-steps {
+            display: flex;
+            gap: 2rem;
+            color: white;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step.active {
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        .checkout-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: #1976d2;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .saved-address {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 5px;
+            border: 2px solid #1976d2;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .payment-method {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .payment-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-option:hover {
+            border-color: #1976d2;
+        }
+
+        .payment-option.selected {
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+
+        .order-summary {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .summary-title {
+            color: #1976d2;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .summary-item strong {
+            font-weight: 600;
+        }
+
+        .order-items {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-total {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1976d2;
+            margin-top: 1rem;
+        }
+
+        .discount-badge {
+            background: #4caf50;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .place-order-btn {
+            width: 100%;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: background 0.3s;
+        }
+
+        .place-order-btn:hover {
+            background: #1565c0;
+        }
+
+        .security-note {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">AI Hypermarket</div>
+            <div class="progress-steps">
+                <div class="step active">1. Delivery</div>
+                <div class="step active">2. Payment</div>
+                <div class="step">3. Confirmation</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="checkout-layout">
+            <div class="checkout-form">
+                <!-- Delivery Information -->
+                <div class="section">
+                    <h2 class="section-title">📍 Delivery Information</h2>
+                    
+                    <div class="saved-address">
+                        <strong>✓ Use Saved Address</strong><br>
+                        <small>123 Main Street, Apt 4B<br>New York, NY 10001</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" value="Sarah" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" value="Johnson" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" value="123 Main Street, Apt 4B" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" value="New York" required>
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            <select required>
+                                <option>NY</option>
+                                <option>CA</option>
+                                <option>TX</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ZIP Code</label>
+                            <input type="text" value="10001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" value="+1 234-567-8900" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Delivery Instructions (Optional)</label>
+                        <input type="text" placeholder="Leave at door, ring bell, etc.">
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="section">
+                    <h2 class="section-title">Payment Method</h2>
+                    
+                    <div class="payment-method">
+                        <div class="payment-option selected">
+                            Credit Card
+                        </div>
+                        <div class="payment-option">
+                            💰<br>Debit Card
+                        </div>
+                        <div class="payment-option">
+                            📱<br>Digital Wallet
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Card Number</label>
+                        <input type="text" placeholder="1234 5678 9012 3456" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="text" placeholder="MM/YY" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" placeholder="123" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cardholder Name</label>
+                        <input type="text" value="Sarah Johnson" required>
+                    </div>
+
+                    <div class="security-note">
+                        🔒 Your payment information is encrypted and secure
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h2 class="summary-title">Order Summary</h2>
+                
+                <div class="order-items">
+                    <div class="item-row">
+                        <span>Organic Salad Mix (x2)</span>
+                        <span>$9.98</span>
+                    </div>
+                    <div class="item-row">
+                        <span>Quinoa Pasta (x1)</span>
+                        <span>$7.99</span>
+                    </div>
+                    <div class="item-row">
+                        <span>Fresh Avocados (x4)</span>
+                        <span>$23.96</span>
+                    </div>
+                </div>
+
+                <div class="summary-row">
+                    <span>Subtotal (3 items):</span>
+                    <span>$42.93</span>
+                </div>
+                <div class="summary-row">
+                    <span>Gold Member Discount (15%):</span>
+                    <span class="discount-badge">-$6.44</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax:</span>
+                    <span>$3.25</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee:</span>
+                    <span style="color: #4caf50; font-weight: bold;">FREE</span>
+                </div>
+
+                <div class="summary-row summary-total">
+                    <span>Total:</span>
+                    <span>$39.74</span>
+                </div>
+
+                <button class="place-order-btn">
+                    Place Order 🛍️
+                </button>
+
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #f9f9f9; border-radius: 5px; font-size: 0.85rem;">
+                    <strong>📦 Estimated Delivery:</strong><br>
+                    February 26, 2026 (2 days)
+                </div>
+
+                <div style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 5px; font-size: 0.85rem;">
+                    <strong>🎁 You're earning:</strong><br>
+                    40 loyalty points with this order!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 AI Hypermarket. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

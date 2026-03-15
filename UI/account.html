@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - AI Hypermarket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: #1976d2;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        nav {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #1976d2;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .page-header h1 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+
+        .account-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 1rem;
+            color: #1976d2;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar li:hover {
+            background: #e3f2fd;
+        }
+
+        .sidebar li.active {
+            background: #1976d2;
+            color: white;
+        }
+
+        .main-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            color: #1976d2;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 0.5rem;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #1976d2;
+        }
+
+        .info-card h4 {
+            color: #1976d2;
+            margin-bottom: 1rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .edit-btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .edit-btn:hover {
+            background: #1565c0;
+        }
+
+        .loyalty-section {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .loyalty-tier {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .points-bar {
+            background: white;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .points-progress {
+            background: #1976d2;
+            height: 100%;
+            width: 75%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .order-history {
+            margin-top: 2rem;
+        }
+
+        .order-card {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .order-status {
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-delivered {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-processing {
+            background: #ff9800;
+            color: white;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="window.location.href='home.html'">AI Hypermarket</div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="#">Products</a></li>
+                <li><a href="#">Festival Specials</a></li>
+                <li><a href="#">Deals & Promotions</a></li>
+                <li><a href="#">My Lists</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>My Account</h1>
+            <p>Manage your profile, preferences, and order history</p>
+        </div>
+
+        <div class="account-layout">
+            <div class="sidebar">
+                <h3>Account Menu</h3>
+                <ul>
+                    <li class="active">Profile & Preferences</li>
+                    <li>Order History</li>
+                    <li>Shopping Lists</li>
+                    <li>Payment Methods</li>
+                    <li>Addresses</li>
+                    <li>Loyalty Program</li>
+                    <li>Settings</li>
+                </ul>
+            </div>
+
+            <div class="main-content">
+                <h2 class="section-title">Profile & Preferences</h2>
+
+                <div class="profile-grid">
+                    <div class="info-card">
+                        <h4>Personal Information</h4>
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span>Sarah Johnson</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email:</span>
+                            <span>sarah.j@email.com</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Phone:</span>
+                            <span>+1 234-567-8900</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Age Range:</span>
+                            <span>25-35</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>Language & Culture</h4>
+                        <div class="info-row">
+                            <span class="info-label">Preferred Language:</span>
+                            <span>English</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Cultural Interests:</span>
+                            <span>Chinese New Year, Christmas</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Region:</span>
+                            <span>North America</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>Dietary Preferences</h4>
+                        <div class="info-row">
+                            <span class="info-label">Diet Type:</span>
+                            <span>Vegetarian</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Allergies:</span>
+                            <span>Gluten</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Avoid:</span>
+                            <span>Dairy Products</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="edit-btn">Edit Profile</button>
+
+                <div class="loyalty-section" style="margin-top: 2rem;">
+                    <div class="loyalty-tier">Gold Member</div>
+                    <p>You're earning 15% off on all purchases!</p>
+                    <div class="points-bar">
+                        <div class="points-progress">750 / 1000 points</div>
+                    </div>
+                    <p>250 more points to Platinum tier!</p>
+                </div>
+
+                <div class="order-history">
+                    <h2 class="section-title">Recent Orders</h2>
+                    
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <strong>Order #12345</strong><br>
+                                <small>February 20, 2026</small>
+                            </div>
+                            <div>
+                                <span class="order-status status-delivered">Delivered</span>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span>Total Items:</span>
+                            <span>8 items</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Total Amount:</span>
+                            <span>$89.45</span>
+                        </div>
+                    </div>
+
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <strong>Order #12344</strong><br>
+                                <small>February 15, 2026</small>
+                            </div>
+                            <div>
+                                <span class="order-status status-processing">Processing</span>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span>Total Items:</span>
+                            <span>5 items</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Total Amount:</span>
+                            <span>$54.20</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 AI Hypermarket. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

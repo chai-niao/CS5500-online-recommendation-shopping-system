@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Personalized Recommendations - AI Hypermarket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: #1976d2;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.7rem 3rem 0.7rem 1rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+        }
+
+        .search-bar button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #1976d2;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* AI Banner */
+        .ai-banner {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .ai-banner h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-banner p {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .preference-tags {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .preference-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* Product Section */
+        .product-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .product-section h2 {
+            color: #1976d2;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .ai-match {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #4caf50;
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 3.5rem;
+        }
+
+        .product-info h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .product-description {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .dietary-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dietary-tag {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        .product-price {
+            color: #1976d2;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            margin-top: 0.5rem;
+        }
+
+        .add-to-cart:hover {
+            background: #1565c0;
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        /* Chatbot */
+        .chatbot-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #1976d2;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">AI Hypermarket</div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products, brands, categories...">
+                <button>Search</button>
+            </div>
+            <div class="header-icons">
+                <button class="icon-btn" onclick="window.location.href='account.html'">Account</button>
+                <button class="icon-btn" onclick="window.location.href='cart.html'">Cart (3)</button>
+                <button class="icon-btn">Lists</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="search-results.html">Products</a></li>
+                <li><a href="festival-specials.html">Festival Specials</a></li>
+                <li><a href="#deals">Deals & Promotions</a></li>
+                <li><a href="#shopping-list">My Lists</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- AI Banner -->
+        <div class="ai-banner">
+            <h1>AI Personalized Recommendations</h1>
+            <p>Curated just for you, Sarah!</p>
+            <p>Based on your purchase history, dietary preferences, and browsing behavior</p>
+            <div class="preference-tags">
+                <span class="preference-tag">Vegetarian</span>
+                <span class="preference-tag">Gluten-Free</span>
+                <span class="preference-tag">Organic Preferred</span>
+                <span class="preference-tag">Gold Member</span>
+            </div>
+        </div>
+
+        <!-- Top Picks for You -->
+        <div class="product-section">
+            <h2>Top Picks for You</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="ai-match">95% Match</div>
+                    <div class="product-image">🥗</div>
+                    <div class="product-info">
+                        <h3>Organic Salad Mix</h3>
+                        <p class="product-description">Fresh mixed greens, locally sourced</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                            <span class="dietary-tag">Organic</span>
+                        </div>
+                        <div class="product-price">$4.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">92% Match</div>
+                    <div class="product-image">🌾</div>
+                    <div class="product-info">
+                        <h3>Quinoa Pasta</h3>
+                        <p class="product-description">Protein-rich gluten-free pasta</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                        </div>
+                        <div class="product-price">$7.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">90% Match</div>
+                    <div class="product-image">🥑</div>
+                    <div class="product-info">
+                        <h3>Fresh Avocados</h3>
+                        <p class="product-description">Perfectly ripe, ready to eat</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                            <span class="dietary-tag">Organic</span>
+                        </div>
+                        <div class="product-price">$5.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">88% Match</div>
+                    <div class="product-image">🥜</div>
+                    <div class="product-info">
+                        <h3>Almond Butter</h3>
+                        <p class="product-description">100% pure, no additives</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                        </div>
+                        <div class="product-price">$9.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frequently Bought Together -->
+        <div class="product-section">
+            <h2>Frequently Bought Together</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="ai-match">85% Match</div>
+                    <div class="product-image">🫘</div>
+                    <div class="product-info">
+                        <h3>Organic Black Beans</h3>
+                        <p class="product-description">High protein, low fat</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                            <span class="dietary-tag">Organic</span>
+                        </div>
+                        <div class="product-price">$3.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">87% Match</div>
+                    <div class="product-image">🍅</div>
+                    <div class="product-info">
+                        <h3>Cherry Tomatoes</h3>
+                        <p class="product-description">Sweet and juicy</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                        </div>
+                        <div class="product-price">$4.49</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">84% Match</div>
+                    <div class="product-image">🧈</div>
+                    <div class="product-info">
+                        <h3>Coconut Oil</h3>
+                        <p class="product-description">Organic, cold-pressed</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                            <span class="dietary-tag">Organic</span>
+                        </div>
+                        <div class="product-price">$11.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">82% Match</div>
+                    <div class="product-image">🥥</div>
+                    <div class="product-info">
+                        <h3>Coconut Milk</h3>
+                        <p class="product-description">Creamy dairy alternative</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                        </div>
+                        <div class="product-price">$3.49</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Arrivals Just for You -->
+        <div class="product-section">
+            <h2>New Arrivals Just for You</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="ai-match">89% Match</div>
+                    <div class="product-image">🍄</div>
+                    <div class="product-info">
+                        <h3>Shiitake Mushrooms</h3>
+                        <p class="product-description">Fresh organic mushrooms</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                            <span class="dietary-tag">Organic</span>
+                        </div>
+                        <div class="product-price">$6.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">86% Match</div>
+                    <div class="product-image">🌿</div>
+                    <div class="product-info">
+                        <h3>Fresh Herbs Bundle</h3>
+                        <p class="product-description">Basil, cilantro, and parsley</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                            <span class="dietary-tag">Organic</span>
+                        </div>
+                        <div class="product-price">$5.49</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">83% Match</div>
+                    <div class="product-image">🫑</div>
+                    <div class="product-info">
+                        <h3>Bell Pepper Mix</h3>
+                        <p class="product-description">Colorful and crunchy</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                        </div>
+                        <div class="product-price">$4.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="ai-match">80% Match</div>
+                    <div class="product-image">🥦</div>
+                    <div class="product-info">
+                        <h3>Organic Broccoli</h3>
+                        <p class="product-description">Fresh and nutritious</p>
+                        <div class="dietary-tags">
+                            <span class="dietary-tag">Vegetarian</span>
+                            <span class="dietary-tag">Gluten-Free</span>
+                            <span class="dietary-tag">Organic</span>
+                        </div>
+                        <div class="product-price">$3.99</div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot -->
+    <div class="chatbot-container">
+        <button class="chatbot-toggle">Chat</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <ul>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Sustainability</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Customer Service</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Returns & Refunds</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Privacy & Terms</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect With Us</h4>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
