@@ -1,52 +1,46 @@
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
 const { products, users, festivals } = require('../data/mockData');
+const { inferProductTags, buildUserTagProfile, tagOverlapScore } = require('../recommendation/tagSystem');
+const { rankProducts } = require('../recommendation/ranker');
+const { getEmbeddingServiceStatus, getEmbeddingScoresForUserItems } = require('../recommendation/embeddingClient');
+const { getTagExtractionStatus, extractCandidateTagsForProduct } = require('../recommendation/tagExtractionClient');
 
 const router = express.Router();
 
-/**
- * Simple content-based recommendation:
- * Based on user's dietary preferences and cultural interests,
- * filter and rank products.
- * (DB/ML interface reserved for future implementation)
- */
-const getPersonalizedRecommendations = (user, limit = 8) => {
-  const prefs = (user.dietaryPreferences || []).map(p => p.toLowerCase());
-  const interests = (user.culturalInterests || []).map(i => i.toLowerCase());
-
-  let scored = products.map(product => {
-    let score = 0;
-    // Dietary match
-    prefs.forEach(pref => {
-      if (product.tags.some(t => t.toLowerCase().includes(pref.split('-')[0]))) score += 2;
-      if (product.dietaryInfo.some(d => d.toLowerCase().includes(pref.split('-')[0]))) score += 2;
-    });
-    // Festival match
-    interests.forEach(interest => {
-      if (product.festivalTags.some(ft => ft.toLowerCase().includes(interest.split(' ')[0]))) score += 3;
-    });
-    // Featured bonus
-    if (product.featured) score += 1;
-    // Rating bonus
-    score += product.rating * 0.5;
-    return { ...product, _score: score };
-  });
-
-  scored.sort((a, b) => b._score - a._score);
-  return scored.slice(0, limit).map(({ _score, ...p }) => p);
-};
+const buildCandidates = () => products.map(p => ({ ...p, _normalizedTags: inferProductTags(p) }));
 
 // GET /api/recommendations - personalized recommendations
-router.get('/', authMiddleware, (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   const user = users.find(u => u.id === req.user.id);
   const limit = parseInt(req.query.limit) || 8;
   if (!user) return res.status(404).json({ message: 'User not found' });
-  const recs = getPersonalizedRecommendations(user, limit);
+
+  const candidates = buildCandidates();
+  const profileTags = buildUserTagProfile(user);
+  const userWithProfile = { ...user, _profileTags: profileTags };
+  const embedding = await getEmbeddingScoresForUserItems(userWithProfile, candidates);
+
+  const { ranked, weights } = rankProducts({ user: userWithProfile, products: candidates, embeddingScores: embedding.scores });
+  const recs = ranked.slice(0, limit).map(r => r.product);
+
   res.json({
     recommendations: recs,
     basedOn: { dietaryPreferences: user.dietaryPreferences, culturalInterests: user.culturalInterests },
-    // TODO: Replace with collaborative filtering + content-based ML model (DB required)
-    note: 'Content-based recommendations. Full hybrid ML recommendations pending DB integration.'
+    strategy: {
+      pipeline: ['2-tag-system', '4-formula-ranking', '3-embedding-hybrid', '5-ai-tagging-slot'],
+      weights,
+      embedding: {
+        provider: getEmbeddingServiceStatus().provider,
+        model: getEmbeddingServiceStatus().model,
+        enabled: getEmbeddingServiceStatus().enabled,
+        available: embedding.available,
+        reason: embedding.reason
+      }
+    },
+    note: embedding.available
+      ? 'Hybrid recommendations active: rule ranking + embedding blending.'
+      : 'Hybrid pipeline is active with embedding slot reserved. Currently using tag+formula ranking fallback until BAAI service is ready.'
   });
 });
 
@@ -54,6 +48,8 @@ router.get('/', authMiddleware, (req, res) => {
 router.get('/festival', authMiddleware, (req, res) => {
   const user = users.find(u => u.id === req.user.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
+  const userWithProfile = { ...user, _profileTags: buildUserTagProfile(user) };
+
   const now = new Date();
   const upcoming = festivals
     .filter(f => {
@@ -62,10 +58,18 @@ router.get('/festival', authMiddleware, (req, res) => {
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const festivalProducts = upcoming.map(f => ({
-    festival: f,
-    products: products.filter(p => p.festivalTags.some(t => f.tags.includes(t))).slice(0, 6)
-  }));
+  const festivalProducts = upcoming.map(f => {
+    const matched = products
+      .filter(p => p.festivalTags.some(t => f.tags.includes(t)))
+      .map(p => ({ ...p, _normalizedTags: inferProductTags(p) }));
+
+    const { ranked } = rankProducts({ user: userWithProfile, products: matched, embeddingScores: {} });
+
+    return {
+      festival: f,
+      products: ranked.slice(0, 6).map(r => r.product)
+    };
+  });
 
   res.json({ festivalRecommendations: festivalProducts });
 });
@@ -74,11 +78,47 @@ router.get('/festival', authMiddleware, (req, res) => {
 router.get('/similar/:productId', (req, res) => {
   const product = products.find(p => p.id === req.params.productId);
   if (!product) return res.status(404).json({ message: 'Product not found' });
+
+  const baseTags = inferProductTags(product);
   const similar = products
-    .filter(p => p.id !== product.id && p.category === product.category)
-    .sort((a, b) => b.rating - a.rating)
+    .filter(p => p.id !== product.id)
+    .map(p => {
+      const pTags = inferProductTags(p);
+      const overlap = tagOverlapScore(pTags, baseTags);
+      const sameCategory = p.category === product.category ? 1 : 0;
+      const score = overlap * 0.7 + sameCategory * 0.2 + (p.rating / 5) * 0.1;
+      return { ...p, _score: score };
+    })
+    .sort((a, b) => b._score - a._score)
     .slice(0, 4);
-  res.json({ similar });
+
+  res.json({ similar: similar.map(({ _score, ...rest }) => rest) });
+});
+
+// GET /api/recommendations/pipeline/status - model slots status
+router.get('/pipeline/status', authMiddleware, (req, res) => {
+  res.json({
+    pipeline: ['2-tag-system', '4-formula-ranking', '3-embedding-hybrid', '5-ai-tagging-slot'],
+    embedding: getEmbeddingServiceStatus(),
+    tagExtraction: getTagExtractionStatus()
+  });
+});
+
+// POST /api/recommendations/tags/extract/:productId - Qwen tag extraction slot
+router.post('/tags/extract/:productId', authMiddleware, async (req, res) => {
+  const product = products.find(p => p.id === req.params.productId);
+  if (!product) return res.status(404).json({ message: 'Product not found' });
+
+  const result = await extractCandidateTagsForProduct(product);
+  res.json({
+    productId: product.id,
+    productName: product.name,
+    candidateTags: result.tags,
+    source: result.source,
+    model: result.model,
+    modelReady: result.modelReady,
+    note: result.note
+  });
 });
 
 module.exports = router;

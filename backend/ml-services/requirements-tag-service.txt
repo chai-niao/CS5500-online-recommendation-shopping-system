@@ -1,0 +1,9 @@
+fastapi>=0.116.0
+uvicorn>=0.35.0
+pydantic>=2.11.0
+# Optional but required for real Qwen inference
+transformers>=4.51.0
+torch>=2.6.0
+accelerate>=1.8.0
+safetensors>=0.6.0
+sentencepiece>=0.2.0

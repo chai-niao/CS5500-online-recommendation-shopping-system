@@ -93,6 +93,83 @@ npm start
 
 Frontend runs at: **http://localhost:3000**
 
+### 4. One-Click Start (Recommended)
+
+#### Windows
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start_all.ps1
+```
+
+#### macOS
+
+```bash
+chmod +x start_all.sh
+./start_all.sh
+```
+
+After startup, verify services:
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:5000/api/health`
+- Embedding service (BAAI): `http://localhost:8001/health`
+- Tag extraction service (Qwen): `http://localhost:8002/health`
+
+---
+
+## Recommendation System (2435) — Principle
+
+Current recommendation pipeline follows **2 → 4 → 3 → 5**:
+
+### 2) Tag System
+- Build normalized tags for products and users (dietary, festival, category, price band, etc.)
+- Create user profile tags from `dietaryPreferences` and `culturalInterests`
+- Compute overlap-based relevance between user tags and product tags
+
+### 4) Formula Ranking
+- Use an interpretable weighted score:
+
+$$
+s_{rule}=w_1\cdot tagMatch + w_2\cdot popularity + w_3\cdot rating + w_4\cdot featured + w_5\cdot priceAffinity + w_6\cdot freshness
+$$
+
+- Weights are configurable in `backend/.env` (`RANK_WEIGHT_*`)
+
+### 3) Embedding Hybrid (BAAI/bge-m3)
+- Python service on port `8001` loads local `bge-m3`
+- Computes semantic similarity between user intent text and item text
+- Blend with rule score:
+
+$$
+s_{final}=(1-\alpha)\cdot s_{rule}+\alpha\cdot s_{emb}
+$$
+
+- If embedding service is unavailable, system automatically falls back to rule score
+
+### 5) AI Auto Tag Extraction (Qwen2.5-7B-Instruct)
+- Python service on port `8002` loads local Qwen model
+- Generates candidate tags constrained by allowed taxonomy
+- If model is unavailable, heuristic extraction fallback is used
+
+Core implementation locations:
+- `backend/src/routes/recommendations.js`
+- `backend/src/recommendation/tagSystem.js`
+- `backend/src/recommendation/ranker.js`
+- `backend/src/recommendation/embeddingClient.js`
+- `backend/src/recommendation/tagExtractionClient.js`
+- `backend/ml-services/embedding_service.py`
+- `backend/ml-services/tag_extraction_service.py`
+
+### Models Used
+- Embedding model: **BAAI/bge-m3** (local directory: `models/bge-m3`)
+- Tag extraction model: **Qwen2.5-7B-Instruct** (local directory: `models/Qwen2.5-7B-Instruct`)
+
+### GitHub Upload Note (Important)
+- Local model files are **not uploaded** to GitHub.
+- The repository ignores model artifacts via `.gitignore` (`models/`, `.venv/`, `__pycache__/`, `*.pyc`).
+- After cloning on a new machine, download models locally and place them under:
+    - `models/bge-m3`
+    - `models/Qwen2.5-7B-Instruct`
+
 ---
 
 ## Demo Credentials
@@ -160,9 +237,11 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 ```
 Then set `OPENAI_API_KEY=sk-...` in `.env`.
 
-### 🧠 ML Recommendations (Phase 2)
-`backend/src/routes/recommendations.js` currently uses content-based filtering.
-Replace `getPersonalizedRecommendations()` with calls to a Python/FastAPI ML service for collaborative filtering.
+### 🧠 ML Recommendations (Current Status)
+The 2435 hybrid pipeline is implemented with local model service slots:
+- BAAI embedding service (`/score`, port 8001)
+- Qwen auto-tag extraction service (`/extract-tags`, port 8002)
+- Rule-based fallback remains enabled for reliability
 
 ---
 

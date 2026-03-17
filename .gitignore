@@ -1,0 +1,100 @@
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# VS Code (keep shared settings if needed)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# =========================
+# Logs
+# =========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# Python virtual environments
+.venv/
+venv/
+
+# =========================
+# Node.js dependencies
+# =========================
+node_modules/
+**/node_modules/
+
+# Package manager caches
+.npm/
+.pnpm-store/
+.yarn/
+
+# =========================
+# Build outputs / coverage
+# =========================
+dist/
+build/
+coverage/
+**/dist/
+**/build/
+**/coverage/
+
+# Frontend-specific
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.eslintcache
+frontend/.stylelintcache
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.tmp
+*.bak
+
+# =========================
+# Test / tooling artifacts
+# =========================
+.nyc_output/
+.cache/
+.eslintcache
+
+# =========================
+# Runtime data
+# =========================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Local ML models / caches
+models/
+**/__pycache__/
+*.pyc
+
+# =========================
+# Archives / binaries (optional)
+# Uncomment if you don't want these committed
+# =========================
+# *.zip
+# *.tar
+# *.gz
+# *.7z
+# *.exe
+# *.dll
