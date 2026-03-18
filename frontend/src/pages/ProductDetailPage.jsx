@@ -103,6 +103,18 @@ export default function ProductDetailPage() {
             {product.dietaryInfo.map(t => <span key={t} style={s.tag}>{t}</span>)}
           </div>
 
+          {product.location && (
+            <div style={{ background: '#e8f5e9', border: '1px solid #c8e6c9', borderRadius: 8, padding: '0.8rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>📍</span>
+              <div>
+                <div style={{ fontWeight: 600, color: '#2e7d32', fontSize: '0.9rem' }}>Find in Store</div>
+                <div style={{ color: '#555', fontSize: '0.85rem' }}>
+                  Aisle {product.location.aisle}, Section {product.location.section}, Shelf {product.location.shelf} — {product.location.zone} Zone
+                </div>
+              </div>
+            </div>
+          )}
+
           <p style={{ color: '#555', lineHeight: 1.6, marginBottom: '1.2rem' }}>{product.description}</p>
 
           <div style={s.qtyRow}>

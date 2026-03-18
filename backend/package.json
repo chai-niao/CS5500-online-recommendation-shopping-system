@@ -5,7 +5,10 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "seed:pg": "node src/db/seed.js",
+    "seed:mongo": "node src/db/mongo-seed.js",
+    "seed:all": "node src/db/seed.js && node src/db/mongo-seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -13,6 +16,9 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.1.0",
+    "openai": "^6.32.0",
+    "pg": "^8.20.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

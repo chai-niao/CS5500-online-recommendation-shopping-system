@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const { connectMongo } = require('./db/mongo');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -38,9 +39,20 @@ app.get('/api/health', (req, res) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📌 Environment: ${process.env.NODE_ENV}`);
-});
+
+async function start() {
+  try {
+    await connectMongo();
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+start();
 
 module.exports = app;
