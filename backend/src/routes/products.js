@@ -1,8 +1,30 @@
 const express = require('express');
 const { getDb } = require('../db/mongo');
 const pool = require('../db/postgres');
+const jwt = require('jsonwebtoken');
+const { tryGetDb } = require('../db/mongo');
+const { logUserEvent } = require('../recommendation/behaviorLogger');
 
 const router = express.Router();
+
+function getOptionalUserId(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  try {
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded?.id || null;
+  } catch {
+    return null;
+  }
+}
+
+function formatDateOnly(value) {
+  if (!value) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toISOString().slice(0, 10);
+}
 
 // GET /api/products - list with optional filters
 router.get('/', async (req, res) => {
@@ -29,6 +51,24 @@ router.get('/', async (req, res) => {
     const products = await col.find(filter).skip(skip).limit(parseInt(limit)).toArray();
 
     const cleaned = products.map(({ _id, ...rest }) => rest);
+
+    const userId = getOptionalUserId(req);
+    if (userId && q) {
+      await logUserEvent({
+        db: tryGetDb(),
+        userId,
+        action: 'search',
+        data: {
+          query: q,
+          category: category || null,
+          festivalTag: festivalTag || null,
+          featured: featured || null,
+          resultCount: cleaned.length,
+          topProductIds: cleaned.slice(0, 10).map(p => p.id),
+        },
+      });
+    }
+
     res.json({ products: cleaned, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -53,7 +93,7 @@ router.get('/festivals', async (req, res) => {
       id: row.id,
       name: row.name,
       emoji: row.emoji,
-      date: row.date,
+      date: formatDateOnly(row.date),
       tags: row.tags || [],
       color: row.color,
       description: row.description,
@@ -70,6 +110,18 @@ router.get('/:id', async (req, res) => {
     const product = await getDb().collection('products').findOne({ id: req.params.id });
     if (!product) return res.status(404).json({ message: 'Product not found' });
     const { _id, ...cleaned } = product;
+
+    const userId = getOptionalUserId(req);
+    if (userId) {
+      await logUserEvent({
+        db: tryGetDb(),
+        userId,
+        action: 'view_product',
+        productId: cleaned.id,
+        data: { category: cleaned.category || null, price: cleaned.price || null }
+      });
+    }
+
     res.json({ product: cleaned });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

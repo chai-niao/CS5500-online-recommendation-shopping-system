@@ -2,7 +2,8 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../middleware/auth');
 const pool = require('../db/postgres');
-const { getDb } = require('../db/mongo');
+const { getDb, tryGetDb } = require('../db/mongo');
+const { logUserEvent } = require('../recommendation/behaviorLogger');
 
 const router = express.Router();
 
@@ -129,6 +130,31 @@ router.post('/', authMiddleware, async (req, res) => {
     );
 
     await client.query('COMMIT');
+
+    const db = tryGetDb();
+    await logUserEvent({
+      db,
+      userId: uid,
+      action: 'checkout',
+      data: {
+        orderId,
+        total: parseFloat(total.toFixed(2)),
+        itemCount: cartItems.reduce((sum, i) => sum + i.quantity, 0),
+      }
+    });
+    for (const item of cartItems) {
+      await logUserEvent({
+        db,
+        userId: uid,
+        action: 'purchase',
+        productId: item.productId,
+        data: {
+          orderId,
+          quantity: item.quantity,
+          price: item.price,
+        }
+      });
+    }
 
     const order = {
       id: orderId,

@@ -1,7 +1,8 @@
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
 const pool = require('../db/postgres');
-const { getDb } = require('../db/mongo');
+const { getDb, tryGetDb } = require('../db/mongo');
+const { logUserEvent } = require('../recommendation/behaviorLogger');
 
 const router = express.Router();
 
@@ -76,6 +77,14 @@ router.post('/add', authMiddleware, async (req, res) => {
     `, [cartId, productId, parseInt(quantity)]);
 
     await pool.query('UPDATE carts SET updated_at = NOW() WHERE id = $1', [cartId]);
+
+    await logUserEvent({
+      db: tryGetDb(),
+      userId: uid,
+      action: 'add_to_cart',
+      productId,
+      data: { quantity: parseInt(quantity), cartId }
+    });
 
     res.json(await enrichCart(uid));
   } catch (err) {

@@ -1,10 +1,12 @@
 import os
 from typing import Dict, List, Optional
+from pathlib import Path
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-EMBEDDING_MODEL_DIR = os.getenv("EMBEDDING_MODEL_DIR", r"e:\work\CS5500\final project\models\bge-m3")
+DEFAULT_EMBEDDING_MODEL_DIR = str((Path(__file__).resolve().parents[2] / "models" / "bge-m3"))
+EMBEDDING_MODEL_DIR = os.getenv("EMBEDDING_MODEL_DIR", DEFAULT_EMBEDDING_MODEL_DIR)
 
 app = FastAPI(title="BAAI BGE-m3 Embedding Service", version="1.0.0")
 

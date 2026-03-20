@@ -13,7 +13,6 @@ const s = {
   error: { background: '#ffebee', color: '#c62828', padding: '0.75rem', borderRadius: 8, marginBottom: '1rem', fontSize: '0.88rem', textAlign: 'center' },
   footer: { textAlign: 'center', marginTop: '1.5rem', color: '#666', fontSize: '0.9rem' },
   link: { color: '#1976d2', textDecoration: 'none', fontWeight: 500 },
-  demo: { background: '#e3f2fd', color: '#1565c0', padding: '0.75rem', borderRadius: 8, marginBottom: '1.5rem', fontSize: '0.85rem', textAlign: 'center' },
 };
 
 export default function LoginPage() {
@@ -38,19 +37,11 @@ export default function LoginPage() {
     }
   };
 
-  const fillDemo = () => { setEmail('demo@hypermarket.com'); setPassword('password123'); };
-
   return (
     <div style={s.page}>
       <div style={s.card}>
         <h1 style={s.title}>🛒 Sign In</h1>
         <p style={s.sub}>Welcome back to AI Hypermarket</p>
-
-        <div style={s.demo}>
-          🔑 Demo account: <strong>demo@hypermarket.com</strong> / <strong>password123</strong>
-          <br />
-          <button onClick={fillDemo} style={{ marginTop: '0.4rem', background: 'none', border: 'none', color: '#1565c0', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem' }}>Auto-fill demo credentials</button>
-        </div>
 
         {error && <div style={s.error}>{error}</div>}
 

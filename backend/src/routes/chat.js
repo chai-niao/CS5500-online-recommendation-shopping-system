@@ -2,7 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../middleware/auth');
 const pool = require('../db/postgres');
-const { getDb } = require('../db/mongo');
+const { tryGetDb, isMongoConnected } = require('../db/mongo');
 
 const router = express.Router();
 
@@ -16,15 +16,66 @@ function getOpenAI() {
   return openai;
 }
 
-// Build dynamic system prompt with product catalog, user orders, and promotions
-async function buildSystemPrompt(userId) {
-  // 1. Fetch all products (with locations)
-  const products = await getDb().collection('products').find({}).toArray();
+const MAX_PRODUCTS_IN_PROMPT = parseInt(process.env.CHAT_PROMPT_PRODUCT_LIMIT || '15', 10);
+
+async function getRelevantProductsForPrompt(userMessage) {
+  const db = tryGetDb();
+  if (!db) return [];
+
+  const col = db.collection('products');
+  const text = (userMessage || '').trim();
+
+  if (!text) {
+    return col.find({ featured: true }).limit(MAX_PRODUCTS_IN_PROMPT).toArray();
+  }
+
+  const tokens = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(t => t.length >= 3)
+    .slice(0, 8);
+
+  // Try full-text first (index created in mongo-seed.js)
+  try {
+    const textSearch = await col.find({ $text: { $search: text } }, { projection: { score: { $meta: 'textScore' } } })
+      .sort({ score: { $meta: 'textScore' } })
+      .limit(MAX_PRODUCTS_IN_PROMPT)
+      .toArray();
+
+    if (textSearch.length > 0) return textSearch;
+  } catch (_) {
+    // ignore and fallback to regex strategy
+  }
+
+  if (tokens.length === 0) {
+    return col.find({ featured: true }).limit(MAX_PRODUCTS_IN_PROMPT).toArray();
+  }
+
+  const regex = new RegExp(tokens.join('|'), 'i');
+  const fallback = await col.find({
+    $or: [
+      { name: regex },
+      { category: regex },
+      { brand: regex },
+      { tags: regex },
+      { dietaryInfo: regex },
+    ],
+  }).limit(MAX_PRODUCTS_IN_PROMPT).toArray();
+
+  if (fallback.length > 0) return fallback;
+  return col.find({ featured: true }).limit(MAX_PRODUCTS_IN_PROMPT).toArray();
+}
+
+// Build dynamic system prompt with relevant products, user orders, and promotions
+async function buildSystemPrompt(userId, userMessage) {
+  // 1. Fetch relevant products (bounded for token safety)
+  const products = await getRelevantProductsForPrompt(userMessage);
   const productLines = products.map(p => {
     const loc = p.location
       ? `Location: Aisle ${p.location.aisle}, Section ${p.location.section}, Shelf ${p.location.shelf}, ${p.location.zone} Zone`
       : 'Location: Not available';
-    const dietary = p.dietaryInfo.length > 0 ? `Dietary: ${p.dietaryInfo.join(', ')}` : '';
+    const dietary = Array.isArray(p.dietaryInfo) && p.dietaryInfo.length > 0 ? `Dietary: ${p.dietaryInfo.join(', ')}` : '';
     return `- ${p.name} (${p.id}) | $${p.price} | Category: ${p.category} | ${loc} | ${dietary} | Stock: ${p.stock}`;
   }).join('\n');
 
@@ -46,7 +97,7 @@ async function buildSystemPrompt(userId) {
   }
 
   // 3. Fetch active promotions
-  const promosResult = await pool.query('SELECT * FROM promotions WHERE active = true');
+  const promosResult = await pool.query('SELECT * FROM promotions WHERE active = true LIMIT 10');
   const promoLines = promosResult.rows.map(p =>
     `- Code: ${p.code} | ${p.description} | Min order: $${p.min_order}`
   ).join('\n');
@@ -68,7 +119,7 @@ IMPORTANT RULES:
 - Be friendly, concise, and helpful.
 - If you don't know something, say so honestly.
 
-PRODUCT CATALOG:
+RELEVANT PRODUCT CONTEXT (TOP ${MAX_PRODUCTS_IN_PROMPT}):
 ${productLines}
 
 CUSTOMER'S RECENT ORDERS:
@@ -99,8 +150,8 @@ router.post('/message', authMiddleware, async (req, res) => {
       });
     }
 
-    // Build system prompt with full context
-    const systemPrompt = await buildSystemPrompt(req.user.id);
+    // Build system prompt with bounded and relevant context
+    const systemPrompt = await buildSystemPrompt(req.user.id, message);
 
     // Call OpenAI
     const completion = await client.chat.completions.create({
@@ -118,23 +169,26 @@ router.post('/message', authMiddleware, async (req, res) => {
 
     // Save conversation to MongoDB
     try {
-      const chatCol = getDb().collection('chat_conversations');
-      await chatCol.updateOne(
-        { userId: req.user.id },
-        {
-          $push: {
-            messages: {
-              $each: [
-                { role: 'user', content: message, timestamp: new Date() },
-                { role: 'assistant', content: reply, timestamp: new Date() },
-              ],
+      const db = tryGetDb();
+      if (db) {
+        const chatCol = db.collection('chat_conversations');
+        await chatCol.updateOne(
+          { userId: req.user.id },
+          {
+            $push: {
+              messages: {
+                $each: [
+                  { role: 'user', content: message, timestamp: new Date() },
+                  { role: 'assistant', content: reply, timestamp: new Date() },
+                ],
+              },
             },
+            $set: { updatedAt: new Date() },
+            $setOnInsert: { userId: req.user.id, sessionId: uuidv4(), createdAt: new Date() },
           },
-          $set: { updatedAt: new Date() },
-          $setOnInsert: { userId: req.user.id, sessionId: uuidv4(), createdAt: new Date() },
-        },
-        { upsert: true }
-      );
+          { upsert: true }
+        );
+      }
     } catch (saveErr) {
       console.error('Failed to save chat history:', saveErr.message);
     }
@@ -159,6 +213,7 @@ router.get('/status', (req, res) => {
   const client = getOpenAI();
   res.json({
     available: !!client,
+    mongoConnected: isMongoConnected(),
     message: client
       ? 'AI chatbot is active and ready.'
       : 'AI chatbot is in stub mode. Set OPENAI_API_KEY in .env to enable AI.',
