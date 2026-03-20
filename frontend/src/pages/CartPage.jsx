@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
@@ -8,6 +8,7 @@ const s = {
   layout: { display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2rem', alignItems: 'start' },
   itemsBox: { background: 'white', borderRadius: 10, padding: '2rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' },
   item: { display: 'grid', gridTemplateColumns: '90px 1fr auto', gap: '1.2rem', padding: '1.2rem 0', borderBottom: '1px solid #f0f0f0', alignItems: 'center' },
+  itemLeft: { display: 'flex', alignItems: 'center', gap: '0.8rem' },
   img: { width: 90, height: 90, background: 'linear-gradient(135deg, #e0e0e0, #f5f5f5)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' },
   itemName: { fontWeight: 600, color: '#222', marginBottom: '0.3rem' },
   itemBrand: { color: '#888', fontSize: '0.85rem' },
@@ -21,11 +22,32 @@ const s = {
   total: { display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', borderTop: '2px solid #e0e0e0', paddingTop: '0.8rem', marginTop: '0.8rem', color: '#1976d2' },
   checkoutBtn: { background: '#1976d2', color: 'white', border: 'none', padding: '0.9rem', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '1rem', width: '100%', marginTop: '1rem' },
   empty: { textAlign: 'center', padding: '4rem 2rem', color: '#888' },
+  selectRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem' },
+  selectLabel: { display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#555', fontSize: '0.92rem' },
 };
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  useEffect(() => {
+    setSelectedIds(cart.items.map((i) => i.product.id));
+  }, [cart.items]);
+
+  const selectedItems = cart.items.filter(({ product }) => selectedIds.includes(product.id));
+
+  const itemTotal = selectedItems.reduce((sum, { product, quantity }) => sum + product.price * quantity, 0);
+  const shipping = itemTotal > 50 ? 0 : 5.99;
+  const total = itemTotal + shipping;
+
+  const toggleSelectAll = (checked) => {
+    setSelectedIds(checked ? cart.items.map((i) => i.product.id) : []);
+  };
+
+  const toggleSelectOne = (productId, checked) => {
+    setSelectedIds((prev) => checked ? [...prev, productId] : prev.filter((id) => id !== productId));
+  };
 
   if (cart.items.length === 0) {
     return (
@@ -40,20 +62,34 @@ export default function CartPage() {
     );
   }
 
-  const itemTotal = cart.subtotal;
-  const shipping = itemTotal > 50 ? 0 : 5.99;
-  const total = itemTotal + shipping;
-
   return (
     <div style={s.container}>
       <h1 style={s.title}>🛒 Shopping Cart ({cart.items.length} items)</h1>
       <div style={s.layout}>
         <div style={s.itemsBox}>
+          <div style={s.selectRow}>
+            <label style={s.selectLabel}>
+              <input
+                type="checkbox"
+                checked={selectedIds.length > 0 && selectedIds.length === cart.items.length}
+                onChange={(e) => toggleSelectAll(e.target.checked)}
+              />
+              Select all items for checkout
+            </label>
+            <span style={{ color: '#888', fontSize: '0.88rem' }}>Selected: {selectedIds.length}/{cart.items.length}</span>
+          </div>
           {cart.items.map(({ product, quantity }) => (
             <div key={product.id} style={s.item}>
-              <Link to={`/products/${product.id}`} style={{ textDecoration: 'none' }}>
-                <div style={s.img}>{product.emoji}</div>
-              </Link>
+              <div style={s.itemLeft}>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(product.id)}
+                  onChange={(e) => toggleSelectOne(product.id, e.target.checked)}
+                />
+                <Link to={`/products/${product.id}`} style={{ textDecoration: 'none' }}>
+                  <div style={s.img}>{product.emoji}</div>
+                </Link>
+              </div>
               <div>
                 <Link to={`/products/${product.id}`} style={{ textDecoration: 'none' }}>
                   <div style={s.itemName}>{product.name}</div>
@@ -73,11 +109,15 @@ export default function CartPage() {
 
         <div style={s.summary}>
           <h3 style={s.summaryTitle}>Order Summary</h3>
+          <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.5rem' }}>For selected items only</div>
           <div style={s.row}><span>Subtotal</span><span>${itemTotal.toFixed(2)}</span></div>
-          <div style={s.row}><span>Shipping</span><span>{shipping === 0 ? <span style={{ color: '#4caf50' }}>FREE</span> : `$${shipping.toFixed(2)}`}</span></div>
+          <div style={s.row}><span>Shipping</span><span>{selectedIds.length === 0 ? '$0.00' : (shipping === 0 ? <span style={{ color: '#4caf50' }}>FREE</span> : `$${shipping.toFixed(2)}`)}</span></div>
           {shipping > 0 && <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Free shipping on orders over $50</p>}
-          <div style={s.total}><span>Total</span><span>${total.toFixed(2)}</span></div>
-          <button style={s.checkoutBtn} onClick={() => navigate('/checkout')}
+          <div style={s.total}><span>Total</span><span>${(selectedIds.length === 0 ? 0 : total).toFixed(2)}</span></div>
+          <button
+            style={{ ...s.checkoutBtn, opacity: selectedIds.length === 0 ? 0.6 : 1, cursor: selectedIds.length === 0 ? 'not-allowed' : 'pointer' }}
+            onClick={() => navigate('/checkout', { state: { selectedProductIds: selectedIds } })}
+            disabled={selectedIds.length === 0}
             onMouseEnter={e => (e.target.style.background = '#1565c0')}
             onMouseLeave={e => (e.target.style.background = '#1976d2')}>
             Proceed to Checkout →

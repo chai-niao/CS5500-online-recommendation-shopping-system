@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../middleware/auth');
 const pool = require('../db/postgres');
+const { tryGetDb } = require('../db/mongo');
 const { mapUserRow, mapAddressRow } = require('./auth');
 
 const router = express.Router();
@@ -102,6 +103,58 @@ router.delete('/me/addresses/:addrId', authMiddleware, async (req, res) => {
     await pool.query('DELETE FROM user_addresses WHERE id = $1 AND user_id = $2', [req.params.addrId, req.user.id]);
     const addrResult = await pool.query('SELECT * FROM user_addresses WHERE user_id = $1', [req.user.id]);
     res.json({ addresses: addrResult.rows.map(mapAddressRow) });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// GET /api/users/me/view-history?limit=20
+router.get('/me/view-history', authMiddleware, async (req, res) => {
+  try {
+    const db = tryGetDb();
+    if (!db) {
+      return res.json({ items: [], message: 'MongoDB unavailable' });
+    }
+
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+
+    const logs = await db
+      .collection('user_activity_logs')
+      .find({ userId: req.user.id, action: 'view_product', productId: { $ne: null } })
+      .sort({ timestamp: -1 })
+      .limit(limit * 5)
+      .toArray();
+
+    // Keep recent unique products by latest viewed timestamp
+    const recentMap = new Map();
+    for (const log of logs) {
+      if (!log.productId || recentMap.has(log.productId)) continue;
+      recentMap.set(log.productId, log.timestamp);
+      if (recentMap.size >= limit) break;
+    }
+
+    const productIds = Array.from(recentMap.keys());
+    if (productIds.length === 0) return res.json({ items: [] });
+
+    const products = await db
+      .collection('products')
+      .find({ id: { $in: productIds } })
+      .project({ _id: 0 })
+      .toArray();
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+    const items = productIds
+      .map((id) => {
+        const p = productMap.get(id);
+        if (!p) return null;
+        return {
+          ...p,
+          viewedAt: recentMap.get(id),
+        };
+      })
+      .filter(Boolean);
+
+    res.json({ items });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

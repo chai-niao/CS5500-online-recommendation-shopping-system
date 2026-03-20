@@ -17,7 +17,13 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+// CORS: Allow frontend from localhost:3000 (dev) and any IP:3000 (network demo)
+const corsOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  /^http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:3000$/ // Allow any IP:3000
+];
+app.use(cors({ origin: corsOrigins, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -66,8 +72,19 @@ async function start() {
     console.warn(`MongoDB error: ${err.message}`);
   }
 
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    const os = require('os');
+    const interfaces = os.networkInterfaces();
+    let localIP = 'localhost';
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]) {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          localIP = iface.address;
+          break;
+        }
+      }
+    }
+    console.log(`Server running on http://${localIP}:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV}`);
   });
 }

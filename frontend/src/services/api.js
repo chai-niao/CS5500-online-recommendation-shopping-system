@@ -61,6 +61,7 @@ export const ordersAPI = {
 // ---- Users ----
 export const usersAPI = {
   getMe: () => api.get('/users/me'),
+  getViewHistory: (limit = 20) => api.get('/users/me/view-history', { params: { limit } }),
   updateMe: (data) => api.put('/users/me', data),
   changePassword: (currentPassword, newPassword) => api.put('/users/me/password', { currentPassword, newPassword }),
   addAddress: (data) => api.post('/users/me/addresses', data),

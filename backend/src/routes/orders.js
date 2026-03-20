@@ -51,7 +51,7 @@ router.post('/', authMiddleware, async (req, res) => {
   const client = await pool.connect();
   try {
     const uid = req.user.id;
-    const { shippingAddress, paymentMethod, promoCode } = req.body;
+    const { shippingAddress, paymentMethod, promoCode, selectedProductIds } = req.body;
 
     // Get cart items from PG
     const cartResult = await client.query(`
@@ -64,14 +64,26 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
+    const selectedSet = Array.isArray(selectedProductIds) && selectedProductIds.length > 0
+      ? new Set(selectedProductIds)
+      : null;
+
+    const selectedRows = selectedSet
+      ? cartResult.rows.filter((row) => selectedSet.has(row.product_id))
+      : cartResult.rows;
+
+    if (selectedRows.length === 0) {
+      return res.status(400).json({ message: 'No selected cart items to checkout' });
+    }
+
     // Fetch product details from MongoDB
-    const productIds = cartResult.rows.map(r => r.product_id);
+    const productIds = selectedRows.map(r => r.product_id);
     const products = await getDb().collection('products')
       .find({ id: { $in: productIds } }).toArray();
     const productMap = {};
     products.forEach(p => { productMap[p.id] = p; });
 
-    const cartItems = cartResult.rows.map(row => {
+    const cartItems = selectedRows.map(row => {
       const product = productMap[row.product_id];
       return {
         productId: row.product_id,
@@ -124,9 +136,10 @@ router.post('/', authMiddleware, async (req, res) => {
       [loyaltyPointsEarned, orderId, uid]
     );
 
-    // Clear cart
+    // Remove only purchased items from cart
     await client.query(
-      'DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = $1)', [uid]
+      'DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = $1) AND product_id = ANY($2::text[])',
+      [uid, productIds]
     );
 
     await client.query('COMMIT');

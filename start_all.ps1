@@ -1,5 +1,23 @@
 $ErrorActionPreference = "Stop"
 
+# 获取本地IP
+$local_ip = $null
+try {
+    $hostname = [System.Net.Dns]::GetHostName()
+    $addresses = [System.Net.Dns]::GetHostAddresses($hostname)
+    $local_ip = $addresses | Where-Object { $_.AddressFamily -eq "InterNetwork" -and $_.ToString() -notmatch "^127\." } | Select-Object -First 1 | ForEach-Object { $_.ToString() }
+} catch { }
+
+if (-not $local_ip) {
+    $local_ip = "localhost"
+}
+
+Write-Host "================================================" -ForegroundColor Cyan
+Write-Host "🎓 CS5500 AI Hypermarket - Full System" -ForegroundColor Green
+Write-Host "================================================" -ForegroundColor Cyan
+Write-Host "Local IP: $local_ip" -ForegroundColor Yellow
+Write-Host ""
+
 $rootDir = $PSScriptRoot
 $mlDir = Join-Path $rootDir "backend\ml-services"
 $backendDir = Join-Path $rootDir "backend"
@@ -56,6 +74,19 @@ Start-Process -FilePath "powershell" -ArgumentList @("-NoExit", "-Command", "cd 
 Wait-HttpOk -Url "http://127.0.0.1:5000/api/health" -TimeoutSec 60 -Name "Backend (5000)" | Out-Null
 
 Write-Host "Starting frontend..."
-Start-Process -FilePath "powershell" -ArgumentList @("-NoExit", "-Command", "cd '$frontendDir'; npm start")
+Start-Process -FilePath "powershell" -ArgumentList @(
+	"-NoExit", 
+	"-Command", 
+	"cd '$frontendDir'; `$env:HOST='0.0.0.0'; `$env:REACT_APP_API_URL='http://$local_ip`:5000/api'; npm start"
+)
 
-Write-Host "All services started. Open http://localhost:3000"
+Write-Host ""
+Write-Host "================================================" -ForegroundColor Cyan
+Write-Host "✨ All services started!" -ForegroundColor Green
+Write-Host ""
+Write-Host "📍 On this computer:" -ForegroundColor Yellow
+Write-Host "   http://localhost:3000" -ForegroundColor Green
+Write-Host ""
+Write-Host "📍 On other devices (same WiFi):" -ForegroundColor Yellow
+Write-Host "   http://$local_ip`:3000" -ForegroundColor Green
+Write-Host "================================================" -ForegroundColor Cyan
