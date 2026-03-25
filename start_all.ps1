@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-# 获取本地IP
+# Detect local IP
 $local_ip = $null
 try {
     $hostname = [System.Net.Dns]::GetHostName()
@@ -13,7 +13,7 @@ if (-not $local_ip) {
 }
 
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "🎓 CS5500 AI Hypermarket - Full System" -ForegroundColor Green
+Write-Host "CS5500 AI Hypermarket - Full System" -ForegroundColor Green
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host "Local IP: $local_ip" -ForegroundColor Yellow
 Write-Host ""
@@ -82,11 +82,11 @@ Start-Process -FilePath "powershell" -ArgumentList @(
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "✨ All services started!" -ForegroundColor Green
+Write-Host "All services started!" -ForegroundColor Green
 Write-Host ""
-Write-Host "📍 On this computer:" -ForegroundColor Yellow
+Write-Host "On this computer:" -ForegroundColor Yellow
 Write-Host "   http://localhost:3000" -ForegroundColor Green
 Write-Host ""
-Write-Host "📍 On other devices (same WiFi):" -ForegroundColor Yellow
+Write-Host "On other devices (same WiFi):" -ForegroundColor Yellow
 Write-Host "   http://$local_ip`:3000" -ForegroundColor Green
 Write-Host "================================================" -ForegroundColor Cyan
