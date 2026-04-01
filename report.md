@@ -169,14 +169,54 @@ flowchart TB
   Actor --> UC9[Get Personalized Recommendations]
 ```
 
-### 6.4 UML Class Summary (Text)
-Key backend modules:
-- `routes/recommendations.js` (orchestrator)
-- `recommendation/ranker.js` (rule scoring)
-- `recommendation/collaborative.js` (behavior CF)
-- `recommendation/embeddingClient.js`
-- `recommendation/tagExtractionClient.js`
-- `recommendation/behaviorLogger.js`
+### 6.4 UML Class Diagram
+
+```mermaid
+classDiagram
+    class RecommendationRouter {
+        +GET /recommendations
+        -orchestrateRanking(user, products)
+    }
+    class Ranker {
+        -WEIGHTS : Object
+        +rankProducts(user, products, embeddingScores) : RankedResult[]
+        -normalize01(v, min, max) : number
+        -getUserPricePreference(user) : string
+    }
+    class TagSystem {
+        +TAG_TAXONOMY : Object
+        +SYNONYM_MAP : Object
+        +inferProductTags(product) : string[]
+        +buildUserTagProfile(user) : string[]
+        +tagOverlapScore(userTags, productTags) : number
+        +extractCandidateTagsHeuristic(product) : string[]
+    }
+    class CollaborativeFilter {
+        -CONFIG : Object
+        -userScoreCache : Map
+        +getCollaborativeScores(db, userId, candidateIds) : Map
+        -toDecay(ts, halfLifeDays) : number
+        -cosineSim(vecA, vecB) : number
+    }
+    class EmbeddingClient {
+        -EMBEDDING_CONFIG : Object
+        +getEmbeddingServiceStatus() : Object
+        +getEmbeddingScoresForUserItems(user, items) : Object
+    }
+    class TagExtractionClient {
+        +extractTags(product) : string[]
+    }
+    class BehaviorLogger {
+        +logUserEvent(db, userId, action, productId, data) : void
+    }
+
+    RecommendationRouter --> Ranker : uses
+    RecommendationRouter --> CollaborativeFilter : uses
+    RecommendationRouter --> EmbeddingClient : uses
+    RecommendationRouter --> TagExtractionClient : uses
+    RecommendationRouter --> BehaviorLogger : uses
+    Ranker --> TagSystem : uses tagOverlapScore
+```
 
 ### 6.5 UML Sequence (Checkout, Simplified)
 ```mermaid
@@ -212,10 +252,95 @@ flowchart TD
   H --> I
 ```
 
-### 6.7 Database Schema (ER Summary)
-- **PostgreSQL**: users, carts, cart_items, orders, order_items, user_addresses, shopping_lists, promotions, festivals
-- **MongoDB**: products, chat_conversations, user_activity_logs
-- Product ID is shared at application level across databases.
+### 6.7 Database Schema (ER Diagram)
+
+#### PostgreSQL Schema
+```mermaid
+erDiagram
+    users {
+        VARCHAR id PK
+        VARCHAR email
+        VARCHAR password_hash
+        VARCHAR first_name
+        VARCHAR last_name
+        TEXT dietary_preferences
+        TEXT cultural_interests
+        VARCHAR preferred_language
+    }
+    user_addresses {
+        VARCHAR id PK
+        VARCHAR user_id FK
+        VARCHAR address_line
+        VARCHAR city
+        VARCHAR state
+        VARCHAR zip
+        BOOLEAN is_default
+    }
+    carts {
+        SERIAL id PK
+        VARCHAR user_id FK
+        TIMESTAMP created_at
+    }
+    cart_items {
+        SERIAL id PK
+        INTEGER cart_id FK
+        VARCHAR product_id
+        INTEGER quantity
+    }
+    orders {
+        VARCHAR id PK
+        VARCHAR user_id FK
+        DECIMAL total_amount
+        VARCHAR status
+        VARCHAR payment_method
+        TIMESTAMP created_at
+    }
+    order_items {
+        SERIAL id PK
+        VARCHAR order_id FK
+        VARCHAR product_id
+        INTEGER quantity
+        DECIMAL price
+    }
+    shopping_lists {
+        VARCHAR id PK
+        VARCHAR user_id FK
+        VARCHAR name
+        VARCHAR sync_status
+    }
+    shopping_list_items {
+        SERIAL id PK
+        VARCHAR list_id FK
+        VARCHAR product_id
+        INTEGER quantity
+    }
+    festivals {
+        VARCHAR id PK
+        VARCHAR name
+        DATE start_date
+        DATE end_date
+    }
+    promotions {
+        VARCHAR id PK
+        VARCHAR code
+        DECIMAL discount
+    }
+
+    users ||--o{ user_addresses : "has"
+    users ||--o| carts : "owns"
+    carts ||--o{ cart_items : "contains"
+    users ||--o{ orders : "places"
+    orders ||--o{ order_items : "includes"
+    users ||--o{ shopping_lists : "creates"
+    shopping_lists ||--o{ shopping_list_items : "contains"
+```
+
+#### MongoDB Collections
+- **products**: catalog data with name, description, price, category, tags, imageUrl, festival associations
+- **chat_conversations**: AI chatbot session logs per user
+- **user_activity_logs**: behavioral events (view_product, search, add_to_cart, checkout, purchase)
+
+Product ID is shared at application level across both databases.
 
 ---
 
@@ -342,14 +467,29 @@ All 52 tests pass. Run with `npm test`.
 ---
 
 ## 12) Version Control History (Git)
-Recent commits indicate staged project evolution:
-- `ede49ad2` add browsing activity + local network sharing
-- `a5eb3fd9` add model to system
-- `25e6db68` database and AI-chatbot integration
-- `23bc1173` update ML system
-- `b2096e99` backend and frontend baseline
 
-Git is used throughout for incremental feature delivery and rollback safety.
+Full commit history showing staged project evolution from initial baseline to final delivery:
+
+| Commit | Date | Author | Description |
+|---|---|---|---|
+| `9ba3f039` | 2026-03-31 | Xinyi Hu | Enhance report with sprint planning and full user stories |
+| `9bd95bcb` | 2026-03-31 | Xinyi Hu | Add user stories and update team roles in report |
+| `7a9362fe` | 2026-03-31 | Xinyi Hu | Update testing section in report with actual test results |
+| `6d035767` | 2026-03-31 | Xinyi Hu | Add automated unit tests (Jest) for recommendation engine and auth helpers |
+| `2efea2d9` | 2026-03-31 | Yutao Zheng | Add documentation |
+| `a312060d` | 2026-03-31 | Yutao Zheng | Merge pull request #2 from feature/yutao-v2 |
+| `69e0a718` | 2026-03-31 | Yutao Zheng | Fix bugs (cart consistency, hook error, image fallback, script encoding) |
+| `a3185563` | 2026-03-31 | Yutao Zheng | Merge pull request #1 from feature/yutao-v2 |
+| `1754d6ff` | 2026-03-31 | Yutao Zheng | Connect services and integration wiring |
+| `f49ea4e3` | 2026-03-31 | Yutao Zheng | Cloud database configuration |
+| `890c01f0` | 2026-03-25 | Yutao Zheng | Add project report |
+| `ede49ad2` | 2026-03-20 | Yutao Zheng | Add browsing activity tracking and local network sharing |
+| `a5eb3fd9` | 2026-03-20 | Yutao Zheng | Add AI model to system |
+| `25e6db68` | 2026-03-18 | Xingchen Liu | Add database and AI-chatbot integration |
+| `23bc1173` | 2026-03-17 | Yutao Zheng | Update ML system |
+| `b2096e99` | 2026-03-15 | Yutao Zheng | Add backend and frontend baseline |
+
+Git is used throughout for incremental feature delivery and rollback safety. The repository uses feature branches with pull requests for code integration.
 
 ---
 
@@ -386,14 +526,36 @@ Git is used throughout for incremental feature delivery and rollback safety.
 - [x] Version-controlled development history
 - [x] Integration test evidence from end-to-end scenarios
 - [x] Automated unit test suite (52 tests, 3 suites, Jest)
-- [ ] Formal ER/UML image assets checked into repo (text diagrams provided here)
+- [x] UML and ER diagrams included as Mermaid in report (Class, Sequence, Activity, ER)
 
 ---
 
 ## Appendix A: UI Wireframes / Mockups
-- Early static mock pages existed under legacy `UI/` prototype.
-- Final implementation uses React pages for production demo flow:
-  Home, Search, Product Detail, Cart, Checkout, Account, Festival Specials, AI Recommendations.
+
+The following wireframe outlines the key pages and navigation flow of the application:
+
+```mermaid
+flowchart LR
+    Home["Home Page\n- Nav bar (logo, search, cart, account)\n- Featured recommendations carousel\n- Festival specials banner\n- Category grid"]
+    Search["Search / Browse\n- Search bar with filters\n- Category/festival tabs\n- Product card grid\n- Sort & filter sidebar"]
+    Detail["Product Detail\n- Product image + info\n- Price & stock status\n- Add to cart button\n- Related recommendations"]
+    Cart["Cart Page\n- Item list with qty controls\n- Per-item selection checkboxes\n- Price subtotal\n- Proceed to checkout"]
+    Checkout["Checkout Page\n- Address selection\n- Payment method (simulated)\n- Promo code input\n- Order summary & confirm"]
+    Account["Account Page\n- Profile & preferences\n- Order history list\n- Recently viewed (20 items)\n- Shopping lists"]
+    Festival["Festival Specials\n- Festival banner\n- Themed product grid\n- Countdown / date info"]
+    Chat["AI Chat Assistant\n- Chat message panel\n- Product question input\n- Suggested queries"]
+
+    Home --> Search
+    Home --> Detail
+    Home --> Festival
+    Search --> Detail
+    Detail --> Cart
+    Cart --> Checkout
+    Home --> Account
+    Home --> Chat
+```
+
+Early static mock pages existed under legacy `UI/` prototype. Final implementation uses React pages matching the wireframe layout above.
 
 ## Appendix B: Assumptions for Demo Environment
 - Same LAN/hotspot network for multi-device access.
