@@ -44,6 +44,19 @@ Out-of-scope:
 - enterprise-scale distributed deployment,
 - full production observability stack.
 
+### Sprint Planning
+
+The project follows Scrum with 2-week sprints. Sprint capacity: 5 team members, ~8-10 hours per member per week.
+
+| Sprint | Phase | Duration | Goal | Status |
+|---|---|---|---|---|
+| Sprint 0 | Analysis | Jan 30 - Feb 9 | Requirements elicitation, scope definition, technology stack | Completed |
+| Sprint 1 | System Design | Feb 10 - Mar 1 | Architecture, database schema, API contracts, wireframes | Completed |
+| Sprint 2 | Core Infrastructure | Mar 2 - Mar 14 | User auth, product catalog, basic UI, database setup | Completed |
+| Sprint 3 | AI & Advanced Features | Mar 15 - Mar 28 | Recommendation engine, festival module, chatbot, checkout | Completed |
+| Sprint 4 | Testing & Hardening | Mar 29 - Apr 5 | Unit/integration testing, bug fixes, automated test suite | Completed |
+| Buffer | Final Submission | Apr 6 - Apr 12 | Report, presentation, code cleanup, deployment | Completed |
+
 ---
 
 ## 3) Requirements Summary
@@ -70,14 +83,23 @@ Out-of-scope:
 
 ### 3.3 User Stories
 
-| ID | User Story | Priority |
-|---|---|---|
-| US-01 | As a shopper, I want personalized recommendations based on my dietary preferences so I can find relevant products quickly. | High |
-| US-02 | As a shopper, I want to see festival-specific products so I can prepare for cultural celebrations. | High |
-| US-03 | As a shopper, I want to select specific items from my cart for checkout so I can manage my purchases flexibly. | Medium |
-| US-04 | As a shopper, I want to view my browsing history so I can revisit products I was interested in. | Medium |
-| US-05 | As a shopper, I want to chat with an AI assistant so I can get quick answers about products. | Medium |
-| US-06 | As a new user, I want to set my cultural interests and dietary preferences during registration so the system can personalize my experience from the start. | High |
+| ID | Story Points | User Story | Status |
+|---|---|---|---|
+| US-01 | 2 | As a consumer, I want to create an account so that I can receive personalized shopping features. | Completed |
+| US-02 | 3 | As a consumer, I want to set dietary, language, and festival preferences so that recommendations match my needs. | Completed |
+| US-03 | 4 | As a consumer, I want secure sign-in so that my profile and shopping data are protected. | Completed |
+| US-04 | 3 | As a consumer, I want to browse and search products so that I can quickly find items to buy. | Completed |
+| US-05 | 5 | As a consumer, I want AI recommendations so that I can discover products relevant to my preferences/history. | Completed |
+| US-06 | 4 | As a consumer, I want festival-season suggestions so that I can prepare for upcoming events. | Completed |
+| US-07 | 3 | As a consumer, I want to add/remove/update cart items so that I can prepare an order before checkout. | Completed |
+| US-08 | 4 | As a consumer, I want a simulated checkout so that I can complete purchase flow safely in prototype mode. | Completed |
+| US-09 | 1 | As a consumer, I want to see points and tier progress so that I understand my rewards. | Completed |
+| US-10 | 2 | As a consumer, I want promotion logic explained so that I understand why discounts are applied. | Completed |
+| US-11 | 3 | As a consumer, I want to create and manage shopping lists so that I can plan purchases efficiently. | Completed |
+| US-12 | 4 | As a consumer, I want to see list sync status so that I know if in-store devices are up to date. | Completed |
+| US-13 | 4 | As a consumer, I want chatbot help for product questions so that I can make faster decisions. | Completed |
+| US-14 | 3 | As a consumer with dietary constraints, I want allergen checks so that I can avoid unsafe products. | Partially Completed |
+| US-15 | 4 | As a consumer, I want control of personalization consent so that I choose how my data is used. | Deferred |
 
 ### 3.4 Constraints & Assumptions
 - Local machine resources limit model inference throughput.
