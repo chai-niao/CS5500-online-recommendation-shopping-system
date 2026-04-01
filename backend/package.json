@@ -9,7 +9,8 @@
     "seed:pg": "node src/db/seed.js",
     "seed:mongo": "node src/db/mongo-seed.js",
     "seed:all": "node src/db/seed.js && node src/db/mongo-seed.js",
-    "seed:demo": "node src/db/seed-demo-data.js"
+    "seed:demo": "node src/db/seed-demo-data.js",
+    "test": "jest --verbose"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -23,6 +24,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "jest": "^30.3.0",
     "nodemon": "^3.0.2"
   }
 }
