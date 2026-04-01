@@ -6,6 +6,11 @@ const pool = require('../db/postgres');
 
 const router = express.Router();
 
+function buildJwtOptions() {
+  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+  return { expiresIn };
+}
+
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
@@ -30,7 +35,7 @@ router.post('/register', async (req, res) => {
     const user = mapUserRow(result.rows[0]);
     user.addresses = [];
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, buildJwtOptions());
     res.status(201).json({ token, user });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -62,7 +67,7 @@ router.post('/login', async (req, res) => {
     const addrResult = await pool.query('SELECT * FROM user_addresses WHERE user_id = $1', [user.id]);
     user.addresses = addrResult.rows.map(mapAddressRow);
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, buildJwtOptions());
     res.json({ token, user });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
