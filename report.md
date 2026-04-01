@@ -68,7 +68,18 @@ Out-of-scope:
 - **NFR-05 Portability**: Windows/macOS scripts and cross-platform model paths.
 - **NFR-06 Usability**: simple UI navigation and task completion without training.
 
-### 3.3 Constraints & Assumptions
+### 3.3 User Stories
+
+| ID | User Story | Priority |
+|---|---|---|
+| US-01 | As a shopper, I want personalized recommendations based on my dietary preferences so I can find relevant products quickly. | High |
+| US-02 | As a shopper, I want to see festival-specific products so I can prepare for cultural celebrations. | High |
+| US-03 | As a shopper, I want to select specific items from my cart for checkout so I can manage my purchases flexibly. | Medium |
+| US-04 | As a shopper, I want to view my browsing history so I can revisit products I was interested in. | Medium |
+| US-05 | As a shopper, I want to chat with an AI assistant so I can get quick answers about products. | Medium |
+| US-06 | As a new user, I want to set my cultural interests and dietary preferences during registration so the system can personalize my experience from the start. | High |
+
+### 3.4 Constraints & Assumptions
 - Local machine resources limit model inference throughput.
 - PostgreSQL + MongoDB are available locally.
 - Model files are downloaded locally (not checked into Git).
@@ -222,12 +233,14 @@ flowchart TD
 ---
 
 ## 8) Team Roles & Responsibilities
-(Organized by module ownership in implementation)
-- **Frontend role**: page UI, routing, account/cart/checkout UX, network demo behavior.
-- **Backend API role**: auth/users/orders/cart/products/recommendations routes.
-- **Recommendation/ML role**: ranking strategy, collaborative filtering, embedding/tag services.
-- **Data role**: PostgreSQL schema/seed, MongoDB collections/indexes.
-- **DevOps/QA role**: startup scripts, health checks, integration validation, bug fixes.
+
+| Team Member | Primary Role(s) | Responsibilities |
+|---|---|---|
+| Yutao Zheng | Frontend Development, Backend API Development, Recommendation/ML Engineering | Page UI, routing, account/cart/checkout UX, network demo behavior; auth/users/orders/cart/products/recommendations routes; ranking strategy, collaborative filtering, embedding/tag services |
+| Xingchen Liu | Database Integration, AI Chatbot Integration | PostgreSQL schema/seed, MongoDB collections/indexes; chat assistant API and conversation management |
+| Xinyi Hu | Automated Testing (Jest), GitHub Project Management, Poster Design | Unit test suites (52 tests across 3 suites), CI test validation; GitHub issue tracking, milestone planning, branch management; project poster for presentation |
+| Junyu Li | Supporting Role — Requirements Analysis, User Feedback | Requirements gathering, user acceptance feedback, feature validation |
+| Lingyi Zhang | Supporting Role — Requirements Analysis, User Feedback | Requirements gathering, user acceptance feedback, feature validation |
 
 ---
 
