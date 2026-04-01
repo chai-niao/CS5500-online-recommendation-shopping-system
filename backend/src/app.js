@@ -17,13 +17,30 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 // Middleware
-// CORS: Allow frontend from localhost:3000 (dev) and any IP:3000 (network demo)
-const corsOrigins = [
+// CORS: local dev + LAN demo + configurable public frontend origins
+const configuredOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const allowedOrigins = new Set([
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  /^http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:3000$/ // Allow any IP:3000
-];
-app.use(cors({ origin: corsOrigins, credentials: true }));
+  ...configuredOrigins,
+]);
+
+const allowLanRegex = /^http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:3000$/;
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow same-origin/non-browser requests (curl, server-side)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    if (allowLanRegex.test(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
