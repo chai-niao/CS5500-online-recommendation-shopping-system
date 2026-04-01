@@ -250,13 +250,33 @@ flowchart TD
 - **Method**: manual integration testing + API health checks + lint/error checks.
 - **Environment**: local full stack with PostgreSQL, MongoDB, ML services.
 
-### 10.2 Unit Test Cases (Planned/Representative)
-> Note: dedicated automated unit test files are not yet completed in current repo.
+### 10.2 Unit Test Cases (Implemented)
 
-Representative unit-level checks performed through module behavior:
-1. `orders` route validates empty cart and selected items logic.
-2. `users` route view-history returns latest unique products.
-3. cart selection calculations in frontend summary totals.
+Three test suites with 52 unit tests have been implemented using Jest:
+
+**tagSystem.test.js (30 tests)**
+- TAG_TAXONOMY structure validation (3 tests)
+- inferProductTags: category, dietary, festival, price band, occasion inference, synonym resolution, deduplication (12 tests)
+- buildUserTagProfile: dietary/festival tag building, empty/missing fields, synonym resolution (5 tests)
+- tagOverlapScore: perfect/zero/partial overlap, empty inputs, defaults (6 tests)
+- extractCandidateTagsHeuristic: dietary/festival extraction, price bands, deduplication, empty input (4 tests)
+
+**ranker.test.js (16 tests)**
+- Return structure validation (ranked array, weights, scoreBreakdown)
+- Ranking correctness (higher-rated products ranked above lower-rated)
+- Featured product bonus
+- Tag overlap scoring for user preferences
+- Embedding score blending and fallback
+- Price affinity (budget vs organic user preference)
+- Default weight values
+- Edge cases (empty list, single product)
+- Sort order verification
+
+**authHelpers.test.js (6 tests)**
+- mapUserRow: snake_case to camelCase conversion, null array defaults, password exclusion
+- mapAddressRow: field mapping, boolean isDefault handling
+
+All 52 tests pass. Run with `npm test`.
 
 ### 10.3 Integration Test Cases (Executed)
 1. Register/login -> token accepted on protected endpoints.
@@ -266,6 +286,7 @@ Representative unit-level checks performed through module behavior:
 5. Network access from other devices on same WiFi/hotspot works.
 
 ### 10.4 Test Summary
+- **52 automated unit tests** across 3 test suites all pass (`npm test`).
 - Core user journey (browse -> cart -> checkout -> order/account) passes.
 - Recommendation pipeline works with optional AI components and fallback.
 - Recent high-priority bugs fixed (cart consistency, hook error, image fallback, script encoding).
@@ -314,7 +335,7 @@ Git is used throughout for incremental feature delivery and rollback safety.
 ---
 
 ## 14) Future Enhancements
-1. Add automated unit/integration tests (Jest + API test suite).
+1. Expand automated test coverage beyond current 52 unit tests (API integration tests, E2E tests).
 2. Offline precomputation for AI tag enrichment to reduce online latency.
 3. A/B testing framework for recommendation strategies.
 4. Production deployment with HTTPS, reverse proxy, and monitoring dashboard.
@@ -329,7 +350,7 @@ Git is used throughout for incremental feature delivery and rollback safety.
 - [x] Documentation for setup/DB/recommendation architecture
 - [x] Version-controlled development history
 - [x] Integration test evidence from end-to-end scenarios
-- [ ] Full automated unit test suite (future work)
+- [x] Automated unit test suite (52 tests, 3 suites, Jest)
 - [ ] Formal ER/UML image assets checked into repo (text diagrams provided here)
 
 ---
