@@ -26,11 +26,16 @@ export default function ChatBot() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    chatAPI.getStatus().then(res => setAiAvailable(res.data.available)).catch(() => {});
+  }, []);
 
   const send = async () => {
     if (!input.trim() || loading) return;
@@ -66,7 +71,7 @@ export default function ChatBot() {
             {loading && <div style={s.botMsg}>Typing...</div>}
             <div ref={messagesEndRef} />
           </div>
-          <div style={s.stub}>⚠️ AI stub mode — OpenAI API pending integration</div>
+          {!aiAvailable && <div style={s.stub}>⚠️ AI stub mode — OpenAI API pending configuration</div>}
           <div style={s.inputRow}>
             <input
               style={s.input}

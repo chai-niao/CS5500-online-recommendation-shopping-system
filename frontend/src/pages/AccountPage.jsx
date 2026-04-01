@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { usersAPI, ordersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,6 +21,10 @@ const s = {
   orderCard: { border: '1px solid #e0e0e0', borderRadius: 10, padding: '1.2rem', marginBottom: '1rem' },
   orderHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' },
   statusBadge: { padding: '0.3rem 0.8rem', borderRadius: 12, fontSize: '0.82rem', fontWeight: 600 },
+  historyGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' },
+  historyCard: { border: '1px solid #e0e0e0', borderRadius: 10, padding: '0.9rem', background: '#fff' },
+  historyImg: { width: '100%', height: 140, objectFit: 'cover', borderRadius: 8, background: '#f5f5f5' },
+  historyMedia: { width: '100%', height: 140, borderRadius: 8, background: 'linear-gradient(135deg, #f3f6fb, #e8eef7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' },
   success: { background: '#e8f5e9', color: '#2e7d32' },
   info: { background: '#e3f2fd', color: '#1565c0' },
   warn: { background: '#fff3e0', color: '#e65100' },
@@ -35,6 +40,8 @@ export default function AccountPage() {
   const [tab, setTab] = useState('profile');
   const [form, setForm] = useState({ name: '', phone: '', ageRange: '', preferredLanguage: '', culturalInterests: [], dietaryPreferences: [] });
   const [orders, setOrders] = useState([]);
+  const [viewHistory, setViewHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -47,6 +54,17 @@ export default function AccountPage() {
   useEffect(() => {
     if (tab === 'orders') {
       ordersAPI.getOrders().then(res => setOrders(res.data.orders)).catch(() => {});
+    }
+  }, [tab]);
+
+  useEffect(() => {
+    if (tab === 'viewHistory') {
+      setHistoryLoading(true);
+      usersAPI
+        .getViewHistory(20)
+        .then((res) => setViewHistory(res.data.items || []))
+        .catch(() => setViewHistory([]))
+        .finally(() => setHistoryLoading(false));
     }
   }, [tab]);
 
@@ -72,6 +90,7 @@ export default function AccountPage() {
   const menuItems = [
     { id: 'profile', icon: '👤', label: 'Profile' },
     { id: 'orders', icon: '📦', label: 'My Orders' },
+    { id: 'viewHistory', icon: '👀', label: 'View Product History' },
     { id: 'addresses', icon: '📍', label: 'Addresses' },
     { id: 'loyalty', icon: '🏆', label: 'Loyalty Points' },
   ];
@@ -155,6 +174,48 @@ export default function AccountPage() {
                   </div>
                 </div>
               ))}
+            </>
+          )}
+
+          {/* View Product History Tab */}
+          {tab === 'viewHistory' && (
+            <>
+              <h2 style={s.title}>View Product History</h2>
+              {historyLoading && <p style={{ color: '#888' }}>Loading...</p>}
+              {!historyLoading && viewHistory.length === 0 && <p style={{ color: '#888' }}>No viewed products yet.</p>}
+              {!historyLoading && viewHistory.length > 0 && (
+                <div style={s.historyGrid}>
+                  {viewHistory.map((p) => (
+                    <div key={p.id} style={s.historyCard}>
+                      {typeof p.imageUrl === 'string' && p.imageUrl.trim() ? (
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          style={s.historyImg}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.nextElementSibling;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div style={{ ...s.historyMedia, display: (typeof p.imageUrl === 'string' && p.imageUrl.trim()) ? 'none' : 'flex' }}>
+                        {p.emoji || '🛒'}
+                      </div>
+                      <div style={{ marginTop: '0.6rem' }}>
+                        <div style={{ fontWeight: 600, color: '#333', minHeight: 44 }}>{p.name}</div>
+                        <div style={{ color: '#1976d2', fontWeight: 700, marginTop: '0.2rem' }}>${Number(p.price || 0).toFixed(2)}</div>
+                        <div style={{ color: '#888', fontSize: '0.82rem', marginTop: '0.2rem' }}>
+                          Viewed: {p.viewedAt ? new Date(p.viewedAt).toLocaleString() : '-'}
+                        </div>
+                        <Link to={`/products/${p.id}`} style={{ display: 'inline-block', marginTop: '0.55rem', color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+                          View details →
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 

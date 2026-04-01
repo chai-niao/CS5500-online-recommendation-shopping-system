@@ -1,11 +1,13 @@
 import os
 import re
 from typing import Dict, List, Optional
+from pathlib import Path
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-MODEL_DIR = os.getenv("QWEN_MODEL_DIR", r"e:\work\CS5500\final project\models\Qwen2.5-7B-Instruct")
+DEFAULT_QWEN_MODEL_DIR = str((Path(__file__).resolve().parents[2] / "models" / "Qwen2.5-7B-Instruct"))
+MODEL_DIR = os.getenv("QWEN_MODEL_DIR", DEFAULT_QWEN_MODEL_DIR)
 MAX_NEW_TOKENS = int(os.getenv("QWEN_MAX_NEW_TOKENS", "128"))
 
 app = FastAPI(title="Qwen Tag Extraction Service", version="1.0.0")

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ordersAPI } from '../services/api';
@@ -28,9 +28,10 @@ const s = {
 const PAY_METHODS = ['Credit Card', 'Debit Card', 'PayPal', 'Apple Pay'];
 
 export default function CheckoutPage() {
-  const { cart } = useCart();
+  const { cart, fetchCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [step] = useState(1);
   const [payMethod, setPayMethod] = useState('Credit Card');
   const [promoCode, setPromoCode] = useState('');
@@ -45,12 +46,18 @@ export default function CheckoutPage() {
     zip: user?.addresses?.[0]?.zip || '',
   });
 
-  const shipping = cart.subtotal > 50 ? 0 : 5.99;
-  const total = Math.max(0, cart.subtotal + shipping - discount);
+  const selectedProductIds = Array.isArray(location.state?.selectedProductIds) ? location.state.selectedProductIds : [];
+  const checkoutItems = selectedProductIds.length > 0
+    ? cart.items.filter(({ product }) => selectedProductIds.includes(product.id))
+    : cart.items;
+  const checkoutSubtotal = checkoutItems.reduce((sum, { product, quantity }) => sum + product.price * quantity, 0);
+
+  const shipping = checkoutItems.length === 0 ? 0 : (checkoutSubtotal > 50 ? 0 : 5.99);
+  const total = Math.max(0, checkoutSubtotal + shipping - discount);
 
   const applyPromo = async () => {
     try {
-      const res = await ordersAPI.validatePromo(promoCode, cart.subtotal);
+      const res = await ordersAPI.validatePromo(promoCode, checkoutSubtotal);
       setDiscount(res.data.discount);
       setPromoMsg(`✅ ${res.data.promo.description} — -$${res.data.discount.toFixed(2)}`);
     } catch (err) {
@@ -60,6 +67,10 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async () => {
+    if (checkoutItems.length === 0) {
+      setError('Please select at least one cart item to checkout');
+      return;
+    }
     if (!addr.street || !addr.city || !addr.state || !addr.zip) {
       setError('Please fill in all address fields');
       return;
@@ -71,7 +82,9 @@ export default function CheckoutPage() {
         shippingAddress: `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`,
         paymentMethod: payMethod,
         promoCode: promoCode || undefined,
+        selectedProductIds: checkoutItems.map(({ product }) => product.id),
       });
+      await fetchCart();
       navigate(`/order-confirmation/${res.data.order.id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to place order');
@@ -125,7 +138,7 @@ export default function CheckoutPage() {
         {/* Order Summary */}
         <div style={s.orderSummary}>
           <h3 style={{ color: '#1976d2', fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1.2rem' }}>Order Summary</h3>
-          {cart.items.map(({ product, quantity }) => (
+          {checkoutItems.map(({ product, quantity }) => (
             <div key={product.id} style={{ ...s.summaryRow, alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1.2rem' }}>{product.emoji}</span>
               <span style={{ flex: 1, fontSize: '0.88rem' }}>{product.name} ×{quantity}</span>
@@ -133,7 +146,7 @@ export default function CheckoutPage() {
             </div>
           ))}
           <hr style={{ margin: '0.8rem 0', border: 'none', borderTop: '1px solid #f0f0f0' }} />
-          <div style={s.summaryRow}><span>Subtotal</span><span>${cart.subtotal.toFixed(2)}</span></div>
+          <div style={s.summaryRow}><span>Subtotal</span><span>${checkoutSubtotal.toFixed(2)}</span></div>
           <div style={s.summaryRow}><span>Shipping</span><span>{shipping === 0 ? <span style={{ color: '#4caf50' }}>FREE</span> : `$${shipping.toFixed(2)}`}</span></div>
           {discount > 0 && <div style={{ ...s.summaryRow, color: '#4caf50' }}><span>Discount</span><span>-${discount.toFixed(2)}</span></div>}
 
