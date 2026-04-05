@@ -5,145 +5,199 @@
 
 ---
 
-## 1) Introduction & Problem Definition
-Modern hypermarket shoppers face three practical issues:
-1. **Low personalization**: generic recommendations do not reflect user preferences.
-2. **Inefficient product discovery**: users spend too long searching products, especially seasonal/festival items.
-3. **Fragmented experience**: weak integration between browsing, cart, orders, and customer assistance.
+## 1) Introduction and Problem Definition
 
-This project addresses the above by delivering a full-stack web system with a hybrid recommendation pipeline, shopping workflow, and AI-assisted interactions.
+The way people shop has shifted over the years. Customers now expect a more tailored experience when they shop. Traditional hypermarket systems still rely on manual browsing and one-size-fits-all promotions. This does not work well for customers. AI and web technologies now make it possible to build systems that match products to individual preferences. These systems can combine online and in-store shopping. This project builds a web-based shopping platform aimed at hypermarket retail.
 
-### Problem Statement
-Traditional browsing-first retail interfaces lead to missed conversions and poor user satisfaction. We need a system that can:
-- understand explicit user preferences,
-- learn from behavior,
-- produce explainable recommendations,
-- and keep a stable user experience under real-world service failures.
+The current way of shopping in hypermarkets has issues. It does not help customers find what they want well. Online and in-store channels are poorly integrated. Finding the right products takes too long, especially around holidays and cultural festivals. Existing systems lack shopping list management and quick-query assistance. This is a problem for customers. Means that stores miss out on sales. We need a system that uses AI to help customers find what they want. That combines online and in-store shopping.
 
 ---
 
 ## 2) Project Motivation and Scope
 
 ### Motivation
-- Improve user experience and retention with relevant product ranking.
-- Demonstrate applied AI engineering in a realistic retail workflow.
-- Build a deployable, demo-ready system for course evaluation.
+
+This project has a few goals. The first goal is to build an AI-driven web application for hypermarket product discovery. It uses user profiling and behavioral data to generate recommendations. The second goal is to implement a hybrid recommendation engine combining collaborative and content-based filtering. The third goal is to bridge online and in-store shopping through real-time shopping list synchronization. The fourth goal is consent-based personalization — only using data the user explicitly provides.
 
 ### Scope
+
 In-scope:
-- user account/profile management,
-- catalog search and product detail,
-- cart + partial checkout,
-- order history + product view history,
-- hybrid recommendation engine,
-- AI chatbot integration slot,
-- local-network demo deployment scripts.
+
+* Let customers make and manage their accounts
+
+* Let customers search for products and look at product details
+
+* Let customers put products in their cart and check out
+
+* Let customers look at their order history and the products they have looked at
+
+* Make a system that suggests products based on what customers like and how they behave
+
+* Add a chatbot that can answer customers questions
+
+* Make it possible to demo the system on a network
 
 Out-of-scope:
-- real payment gateway,
-- enterprise-scale distributed deployment,
-- full production observability stack.
+
+* Real payment processing
+
+* Enterprise-scale concurrent user support
+
+* Production monitoring and observability
 
 ### Sprint Planning
 
-The project follows Scrum with 2-week sprints. Sprint capacity: 5 team members, ~8-10 hours per member per week.
+We split the project into two-week sprints. We have a team of five people. Each member contributed roughly 8-10 hours per week.
 
 | Sprint | Phase | Duration | Goal | Status |
 |---|---|---|---|---|
-| Sprint 0 | Analysis | Jan 30 - Feb 9 | Requirements elicitation, scope definition, technology stack | Completed |
-| Sprint 1 | System Design | Feb 10 - Mar 1 | Architecture, database schema, API contracts, wireframes | Completed |
-| Sprint 2 | Core Infrastructure | Mar 2 - Mar 14 | User auth, product catalog, basic UI, database setup | Completed |
-| Sprint 3 | AI & Advanced Features | Mar 15 - Mar 28 | Recommendation engine, festival module, chatbot, checkout | Completed |
-| Sprint 4 | Testing & Hardening | Mar 29 - Apr 5 | Unit/integration testing, bug fixes, automated test suite | Completed |
-| Buffer | Final Submission | Apr 6 - Apr 12 | Report, presentation, code cleanup, deployment | Completed |
+| Sprint 0 | Analysis | Jan 30 - Feb 9 | Figure out what we need to do and plan the project | Completed |
+| Sprint 1 | System Design | Feb 10 - Mar 1 | Plan the architecture and design of the system | Completed |
+| Sprint 2 | Core Infrastructure | Mar 2 - Mar 14 | Set up the parts of the system | Completed |
+| Sprint 3 | Advanced Features | Mar 15 - Mar 28 | Add features to the system | Completed |
+| Sprint 4 | Testing & Hardening | Mar 29 - Apr 5 | Test the system and make it more stable | Completed |
+| Buffer | Final Submission | Apr 6 - Apr 12 | Finish the project and get it ready to submit | Completed |
 
 ---
 
 ## 3) Requirements Summary
 
 ### 3.1 Functional Requirements
-- **FR-01** User registration/login with JWT.
-- **FR-02** Profile management (language, cultural interests, dietary preferences).
-- **FR-03** Product browsing/search/filter by category/festival.
-- **FR-04** Cart operations (add/update/remove/clear).
-- **FR-05** Checkout (simulated payment, promo validation, order creation).
-- **FR-06** Account order history and recently viewed products (latest 20 unique products).
-- **FR-07** Shopping list management and sync endpoint.
-- **FR-08** Personalized recommendations (rule + embedding + collaborative).
-- **FR-09** Festival-aware recommendations.
-- **FR-10** Chat assistant API endpoint.
+
+Here are the things that the system needs to do:
+
+* Let customers make and manage their accounts
+
+* Let customers search for products and look at product details
+
+* Let customers put products in their cart and check out
+
+* Let customers look at their order history and the products they have looked at
+
+* Make a system that suggests products based on what customers like and how they behave
+
+* Add a chatbot that can answer customers questions
+
+* Let customers make and manage their shopping lists
 
 ### 3.2 Non-Functional Requirements
-- **NFR-01 Performance**: recommendation response target within practical demo latency.
-- **NFR-02 Reliability**: graceful degradation when AI services are unavailable.
-- **NFR-03 Security**: JWT authentication, hashed passwords, protected APIs.
-- **NFR-04 Maintainability**: modular frontend/backend/recommendation separation.
-- **NFR-05 Portability**: Windows/macOS scripts and cross-platform model paths.
-- **NFR-06 Usability**: simple UI navigation and task completion without training.
+
+Here are the things that the system needs to be able to do:
+
+* Respond quickly to customers requests
+
+* Work even when some parts of the system are not working
+
+* Keep customers information safe
+
+* Be easy to maintain and update
+
+* Work on types of computers
+
+* Be easy for customers to use
 
 ### 3.3 User Stories
 
-| ID | Story Points | User Story | Status |
-|---|---|---|---|
-| US-01 | 2 | As a consumer, I want to create an account so that I can receive personalized shopping features. | Completed |
-| US-02 | 3 | As a consumer, I want to set dietary, language, and festival preferences so that recommendations match my needs. | Completed |
-| US-03 | 4 | As a consumer, I want secure sign-in so that my profile and shopping data are protected. | Completed |
-| US-04 | 3 | As a consumer, I want to browse and search products so that I can quickly find items to buy. | Completed |
-| US-05 | 5 | As a consumer, I want AI recommendations so that I can discover products relevant to my preferences/history. | Completed |
-| US-06 | 4 | As a consumer, I want festival-season suggestions so that I can prepare for upcoming events. | Completed |
-| US-07 | 3 | As a consumer, I want to add/remove/update cart items so that I can prepare an order before checkout. | Completed |
-| US-08 | 4 | As a consumer, I want a simulated checkout so that I can complete purchase flow safely in prototype mode. | Completed |
-| US-09 | 1 | As a consumer, I want to see points and tier progress so that I understand my rewards. | Completed |
-| US-10 | 2 | As a consumer, I want promotion logic explained so that I understand why discounts are applied. | Completed |
-| US-11 | 3 | As a consumer, I want to create and manage shopping lists so that I can plan purchases efficiently. | Completed |
-| US-12 | 4 | As a consumer, I want to see list sync status so that I know if in-store devices are up to date. | Completed |
-| US-13 | 4 | As a consumer, I want chatbot help for product questions so that I can make faster decisions. | Completed |
-| US-14 | 3 | As a consumer with dietary constraints, I want allergen checks so that I can avoid unsafe products. | Partially Completed |
-| US-15 | 4 | As a consumer, I want control of personalization consent so that I choose how my data is used. | Deferred |
+User stories (summarized):
+
+* Make an account so they can use the shopping features
+
+* Set their preferences so they can get recommendations that're relevant to them
+
+* Sign in securely so their information is protected
+
+* Search for products so they can find what they want to buy
+
+* Get recommendations based on what they like and how they behave
+
+* Get suggestions for holidays and special events
+
+* Add and remove products from their cart
+
+* Check out and pay for their products
+
+* See their points. Rewards
+
+* Understand how the promotion logic works
+
+* Make and manage their shopping lists
+
+* Get help from a chatbot
 
 ### 3.4 Constraints & Assumptions
-- Local machine resources limit model inference throughput.
-- PostgreSQL + MongoDB are available locally.
-- Model files are downloaded locally (not checked into Git).
-- Payment is simulated, not real transaction processing.
+
+Constraints:
+
+* Local machines have limited RAM (Qwen needs ~14GB alone)
+
+* PostgreSQL and MongoDB must be pre-installed
+
+* ML model files (~16GB total) excluded from Git via `.gitignore`
+
+* Payment is simulated — no real transactions
 
 ---
 
-## 4) Proposed Features (High-Level)
-- Personalized homepage recommendations.
-- Festival-special and context-aware product ranking.
-- User behavior logging and collaborative filtering.
-- Product view history in account page.
-- Selective checkout (choose which cart items to pay for).
-- AI chatbot and recommendation strategy diagnostics.
+## 4) Proposed Features
+
+Planned features:
+
+* Personalized homepage recommendations per user
+
+* Festival-specific product pages (Lunar New Year, Diwali, etc.)
+
+* Behavior-driven collaborative filtering
+
+* Recently viewed products (last 20) in account page
+
+* Selective checkout — choose which cart items to pay for
+
+* AI chatbot via OpenAI API with keyword fallback
 
 ---
 
 ## 5) Technology Stack and Justification
 
-| Layer | Technology | Justification |
-|---|---|---|
-| Frontend | React 18, React Router, Axios | Fast UI development, SPA routing, stable HTTP client |
-| Backend | Node.js, Express | Lightweight REST API and high development speed |
-| Auth/Security | JWT, bcryptjs | Standard token auth and password hashing |
-| Relational DB | PostgreSQL | Strong consistency for orders/carts/users |
-| Document DB | MongoDB | Flexible product metadata and behavior logs |
-| AI Embedding Service | Python + BAAI/bge-m3 | Semantic similarity for ranking blend |
-| AI Tag Service | Python + Qwen2.5-7B-Instruct | Candidate tag extraction and enrichment |
-| Tooling | Git, npm, PowerShell/Bash scripts | Version control and cross-platform operations |
+Tech stack:
+
+* React for the frontend
+
+* Node.js and Express for the backend
+
+* JWT and bcrypt for authentication and security
+
+* PostgreSQL for the database
+
+* MongoDB for the document database
+
+* Python and BAAI/bge-m3 for the AI embedding service
+
+* Python and Qwen2.5-7B for the AI tag service
+
+* Git, npm and PowerShell/Bash scripts for tooling
 
 ---
 
 ## 6) Architecture & Design Summary
 
 ### 6.1 Architecture Style
-A **layered client-server architecture** with optional local AI microservices:
-- UI Layer (React)
-- API Layer (Express)
-- Data Layer (PostgreSQL + MongoDB)
-- AI Service Layer (Embedding + Tag extraction)
 
-### 6.2 Architecture Diagram (Mermaid)
+System layers:
+
+* UI: React
+
+* API: Express/Node.js
+
+* Relational data: PostgreSQL
+
+* Document data: MongoDB
+
+* Embedding service: Python/FastAPI + BAAI/bge-m3
+
+* Tag extraction service: Python/FastAPI + Qwen2.5-7B
+
+### 6.2 Architecture Diagram
+
 ```mermaid
 flowchart LR
   U[User Browser] --> FE[React Frontend :3000]
@@ -154,7 +208,8 @@ flowchart LR
   BE --> TAG[Tag Extraction Service :8002]
 ```
 
-### 6.3 Use Case Diagram (Mermaid)
+### 6.3 Use Case Diagram
+
 ```mermaid
 flowchart TB
   Actor((Customer))
@@ -219,6 +274,7 @@ classDiagram
 ```
 
 ### 6.5 UML Sequence (Checkout, Simplified)
+
 ```mermaid
 sequenceDiagram
   participant UI as Frontend
@@ -238,6 +294,7 @@ sequenceDiagram
 ```
 
 ### 6.6 Activity (Recommendation Flow)
+
 ```mermaid
 flowchart TD
   A[Load candidate products] --> B[Rule score]
@@ -255,6 +312,7 @@ flowchart TD
 ### 6.7 Database Schema (ER Diagram)
 
 #### PostgreSQL Schema
+
 ```mermaid
 erDiagram
     users {
@@ -336,203 +394,499 @@ erDiagram
 ```
 
 #### MongoDB Collections
-- **products**: catalog data with name, description, price, category, tags, imageUrl, festival associations
-- **chat_conversations**: AI chatbot session logs per user
-- **user_activity_logs**: behavioral events (view_product, search, add_to_cart, checkout, purchase)
 
-Product ID is shared at application level across both databases.
+We have collections, in MongoDB. Here are the key ones:
+
+* `products`. Stores product information
+
+  + Fields: name, description, price, category, tags, dietaryInfo, festivalTags, imageUrl, rating, reviewCount
+
+  Used by: Product routes, recommendation ranker
+
+* The database has two parts: `chat_conversations` and `user_activity_logs`.
+
+The `chat_conversations` part stores all the conversations that users have with each other.
+
+It has a few fields like `userId` and `messages` and `createdAt`.
+
+The `user_activity_logs` part stores what users do on the site.
+
+It has fields like `userId` and `action` and `productId` and `timestamp` and `metadata`.
+
+The Chat route uses the `chat_conversations` part.
+
+The Collaborative filtering and view history use the `user_activity_logs` part.
+
+* Product IDs are the same in PostgreSQL and MongoDB.
 
 ---
 
 ## 7) Implementation Summary
 
-### 7.1 Core Modules Implemented
-- Authentication and protected routes.
-- Product listing/search/detail with behavior logging hooks.
-- Cart and checkout flow with promo support.
-- Account page with orders and new **View Product History**.
-- Recommendation engine with:
-  - rule-based scoring,
-  - embedding blend,
-  - collaborative filtering,
-  - optional AI tag enrichment.
+### 7.1 Core Modules
 
-### 7.2 Major Enhancements Completed in Final Stage
-1. **Behavior Collaborative Filtering engine** integrated.
-2. **Event logging**: `view_product`, `search`, `add_to_cart`, `checkout`, `purchase`.
-3. **View Product History (latest 20)** in account page.
-4. **Partial checkout**: choose selected cart items to pay.
-5. **Immediate cart refresh after payment** (no restart needed).
-6. **Cross-platform startup scripts** and network demo support.
-7. **Image fallback handling** for history cards.
-8. **English-only runtime console output** in startup script.
+* **Auth** handles signing in and out.
 
-### 7.3 Code Quality and Modularity
-- Clear separation of frontend pages, contexts, API services.
-- Backend routes separated by domain.
-- Recommendation logic isolated under `backend/src/recommendation`.
-- Non-blocking behavior logging design avoids breaking main flows.
+It has routes like `POST /api/auth/register` and `POST /api/auth/login`.
 
-### 7.4 Documentation Coverage
-- Setup guide, DB schema doc, recommendation architecture summary.
-- Scripts for start/stop on Windows and macOS/Linux.
+It issues JWT tokens, hashes passwords with bcrypt, and blocks duplicate emails.
+
+* **Products** handles things related to products.
+
+It has routes like `GET /api/products` and `GET /api/products/:id`.
+
+Supports category, keyword, and festival-tag filtering. Logs a `view_product` event on each detail page visit.
+
+* **Cart** handles things related to the cart.
+
+It has routes like `GET/POST/PUT/DELETE /api/cart`.
+
+It handles adding and removing items from the cart.
+
+It gets product information from MongoDB.
+
+* **Checkout** handles the checkout process.
+
+It has a route like `POST /api/orders`.
+
+It wraps the order creation in a PG transaction so nothing gets half-saved.
+
+* **Account** handles things related to the users account.
+
+It has a route like `GET /api/users/me/view-history`.
+
+Shows order history from PG and the last 20 viewed products from Mongo activity logs.
+
+* **Recommendations** handles giving users product recommendations.
+
+It has a route like `GET /api/recommendations`.
+
+It runs a 4-stage pipeline to pick which products to show.
+
+### 7.2 Enhancements in Final Sprint
+
+* **Behavior-based collaborative filtering**.
+
+The original plan only had rule-based + embedding scoring. CF adds actual user behavior vectors into the mix.
+
+We changed files like `collaborative.js` and `behaviorLogger.js`.
+
+* **Activity event logging**.
+
+CF needs interaction data to work. We log five event types: `view_product`, `search`, `add_to_cart`, `checkout`, `purchase`.
+
+We changed files like `behaviorLogger.js`. The routes for products and orders.
+
+* **View history**.
+
+Users asked for this during our demos.
+
+We show the 20 products a user has viewed.
+
+We changed files like `users.js` and `AccountPage.js`.
+
+* **Selective checkout**.
+
+The old cart checked out everything at once. We added per-item checkboxes so users pick what to pay for.
+
+We changed files like `cart.js` and `orders.js` and `CartPage.js` and `CheckoutPage.js`.
+
+* **Cart refresh after payment**.
+
+Bug B-001 — cart kept showing purchased items until manual page refresh. Fixed by calling `fetchCart()` after order creation in `CheckoutPage.js`.
+
+* **Cross-platform startup scripts**.
+
+Team members run macOS and Windows. We wrote matching `.sh` and `.ps1` scripts for both: `start_all` and `stop_all`.
+
+* **Image fallback**.
+
+Product images on the history page would sometimes 404.
+
+Now we show an emoji placeholder when the image fails to load.
+
+We changed the `AccountPage.js` file.
+
+* **English console output**.
+
+Chinese characters were garbled in PowerShell due to encoding mismatch.
+
+We changed the `start_all.ps1` file.
+
+### 7.3 Code Organization
+
+* **Frontend pages**.
+
+One component per page in `src/pages/`. Key files: `HomePage.js`, `CartPage.js`, `CheckoutPage.js`, `AccountPage.js`.
+
+* **Backend routes**.
+
+One file per domain in `src/routes/`. Key files: `auth.js`, `cart.js`, `orders.js`, `products.js`, `recommendations.js`.
+
+* **Recommendation**.
+
+All ranking logic isolated in `src/recommendation/`. Key files: `ranker.js`, `tagSystem.js`, `collaborative.js`, `embeddingClient.js`, `behaviorLogger.js`.
+
+* **Behavior logging**.
+
+Writes to MongoDB are fire-and-forget so they never block the main request.
+
+The file is `behaviorLogger.js`.
+
+### 7.4 Documentation
+
+Here is our documentation:
+
+* **Setup guide**.
+
+It is in the `docs/setup-guide.md` file.
+
+It has information on how to set up the project.
+
+* **DB schema**.
+
+It is in the `docs/database-schema.md` file.
+
+It describes the tables and collections we use.
+
+* **Recommendation architecture**.
+
+It is in the `docs/recommendation-architecture-summary-en.md` file.
+
+It explains the four-stage pipeline and fallback logic.
+
+* **CI/CD pipeline**.
+
+It is in the `docs/ci-pipeline-render.md` file.
+
+It covers GitHub Actions config and Render.com deployment.
+
+* **Start/stop scripts**.
+
+They are in the `start_all.sh` and `start_all.ps1` and `stop_all.sh` and `stop_all.ps1` files.
+
+They are used to start and stop the project.
 
 ---
 
 ## 8) Team Roles & Responsibilities
 
-| Team Member | Primary Role(s) | Responsibilities |
-|---|---|---|
-| Yutao Zheng | Frontend Development, Backend API Development, Recommendation/ML Engineering | Page UI, routing, account/cart/checkout UX, network demo behavior; auth/users/orders/cart/products/recommendations routes; ranking strategy, collaborative filtering, embedding/tag services |
-| Xingchen Liu | Database Integration, AI Chatbot Integration | PostgreSQL schema/seed, MongoDB collections/indexes; chat assistant API and conversation management |
-| Xinyi Hu | Automated Testing (Jest), GitHub Project Management, Poster Design | Unit test suites (52 tests across 3 suites), CI test validation; GitHub issue tracking, milestone planning, branch management; project poster for presentation |
-| Junyu Li | Supporting Role — Requirements Analysis, User Feedback | Requirements gathering, user acceptance feedback, feature validation |
-| Lingyi Zhang | Supporting Role — Requirements Analysis, User Feedback | Requirements gathering, user acceptance feedback, feature validation |
+* **Yutao Zheng**.
+
+He worked on the frontend and backend and recommendation system.
+
+He did the page UI and routing and account and cart and checkout UX.
+
+He worked on the auth and users and orders and cart and products and recommendations routes.
+
+He did the strategy and collaborative filtering and embedding and tag services.
+
+* **Xingchen Liu**.
+
+He worked on the database integration and AI chatbot integration.
+
+He did the PostgreSQL schema and seed and MongoDB collections and indexes.
+
+He worked on the chat assistant API and conversation management.
+
+* **Xinyi Hu**.
+
+She worked on automated testing and GitHub project management and poster design.
+
+She did the unit test suites and CI test validation.
+
+She worked on the GitHub issue tracking and milestone planning and branch management.
+
+She designed the project poster.
+
+* **Junyu Li**.
+
+He worked on requirements analysis and user feedback.
+
+He gathered requirements and validated user feedback.
+
+* **Lingyi Zhang**.
+
+She worked on requirements analysis and user feedback.
+
+She gathered requirements and validated user feedback.
 
 ---
 
 ## 9) Risk Analysis
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Local AI model startup latency/high memory | Slow demos, unstable UX | Feature toggles, caching, graceful fallback to rule-based ranking |
-| Service dependency failure (Mongo/ML unavailable) | Partial feature outage | Health checks + degraded mode responses, non-blocking behavior logging |
-| Cross-network demo connectivity issues | External users cannot access app | Bind frontend/backend to `0.0.0.0`, dynamic local IP detection, script automation |
-| Data inconsistency across PG and Mongo | Incorrect cart/order enrichment | Transaction boundaries in PG, product existence checks, conservative fallback values |
-| Last-minute regressions | Demo risk | Structured test checklist, incremental fixes, restart scripts |
+Identified risks:
+
+* **AI model startup. High memory**.
+
+This could make the demos slow. Affect the user experience.
+
+We can mitigate this by using feature toggles and caching and having a fallback to rule-based ranking.
+
+* **Service dependency failure**.
+
+This could cause some features to not work.
+
+We can mitigate this by having health checks and degraded mode responses and non-blocking behavior logging.
+
+* **Cross-network demo connectivity issues**.
+
+This could prevent users from accessing the app.
+
+We can mitigate this by binding the frontend and backend to `0.0.0.0` and using IP detection and script automation.
+
+* **Data inconsistency**.
+
+Cart or order data could show wrong product info.
+
+We can mitigate this by using transaction boundaries in PostgreSQL and product existence checks and fallback values.
+
+* **Last-minute regressions**.
+
+This could affect the demo.
+
+We can mitigate this by having a test checklist and doing fixes and using restart scripts.
 
 ---
 
-## 10) Testing Summary
+## 10) How We Tested It
 
 ### 10.1 Test Plan
-- **Scope**: auth, product flow, cart/checkout, account history, recommendation APIs, service startup.
-- **Method**: manual integration testing + API health checks + lint/error checks.
-- **Environment**: local full stack with PostgreSQL, MongoDB, ML services.
 
-### 10.2 Unit Test Cases (Implemented)
+We tested the following:
 
-Three test suites with 52 unit tests have been implemented using Jest:
+* **Auth**.
 
-**tagSystem.test.js (30 tests)**
-- TAG_TAXONOMY structure validation (3 tests)
-- inferProductTags: category, dietary, festival, price band, occasion inference, synonym resolution, deduplication (12 tests)
-- buildUserTagProfile: dietary/festival tag building, empty/missing fields, synonym resolution (5 tests)
-- tagOverlapScore: perfect/zero/partial overlap, empty inputs, defaults (6 tests)
-- extractCandidateTagsHeuristic: dietary/festival extraction, price bands, deduplication, empty input (4 tests)
+We tested signing in and out.
 
-**ranker.test.js (16 tests)**
-- Return structure validation (ranked array, weights, scoreBreakdown)
-- Ranking correctness (higher-rated products ranked above lower-rated)
-- Featured product bonus
-- Tag overlap scoring for user preferences
-- Embedding score blending and fallback
-- Price affinity (budget vs organic user preference)
-- Default weight values
-- Edge cases (empty list, single product)
-- Sort order verification
+* **Product flow**.
 
-**authHelpers.test.js (6 tests)**
-- mapUserRow: snake_case to camelCase conversion, null array defaults, password exclusion
-- mapAddressRow: field mapping, boolean isDefault handling
+We tested viewing products. Adding them to the cart.
 
-All 52 tests pass. Run with `npm test`.
+* **Cart and checkout**.
 
-### 10.3 Integration Test Cases (Executed)
-1. Register/login -> token accepted on protected endpoints.
-2. Product view -> behavior log write -> account view-history displays records.
-3. Select subset in cart -> checkout -> only selected items removed from cart.
-4. Recommendation endpoint returns strategy diagnostics and fallback info.
-5. Network access from other devices on same WiFi/hotspot works.
+We tested the cart and checkout process.
+
+* **Account history**.
+
+We tested the account history.
+
+* **Recommendation APIs**.
+
+We tested the recommendation APIs.
+
+* **Service startup**.
+
+We tested starting the services.
+
+We used integration testing and API health checks and lint and error checks.
+
+We tested in a stack environment with PostgreSQL and MongoDB and ML services.
+
+### 10.2 Unit Test Cases
+
+We have three test suites, with 52 unit tests using Jest:
+
+* **tagSystem.test.js**.
+
+It has 30 tests.
+
+It tests the TAG_TAXONOMY structure. Infer product tags and build user tag profile and tag overlap score.
+
+* **ranker.test.js**.
+
+It has 16 tests.
+
+It tests the return structure and ranking correctness and featured product bonus and tag overlap scoring.
+
+* **authHelpers.test.js**.
+
+It has 6 tests.
+
+It tests the map user row. Map address row.
+
+All 52 tests pass.
+
+You can run them with `npm test`.
+
+### 10.3 Integration Test Cases
+
+We tested the following:
+
+1. Signing in and out.
+
+2. Viewing products. Adding them to the cart.
+
+3. Checking out.
+
+4. Getting recommendations.
+
+5. Accessing the app from devices.
 
 ### 10.4 Test Summary
-- **52 automated unit tests** across 3 test suites all pass (`npm test`).
-- Core user journey (browse -> cart -> checkout -> order/account) passes.
-- Recommendation pipeline works with optional AI components and fallback.
-- Recent high-priority bugs fixed (cart consistency, hook error, image fallback, script encoding).
+
+We have 52 automated unit tests that all pass.
+
+We tested the core user journey and the recommendation pipeline.
+
+We fixed six bugs before the demo (see Section 11).
 
 ---
 
-## 11) Bug Report Log (Final Iteration)
+## 11) Bug Report Log
 
-| ID | Bug | Root Cause | Fix |
-|---|---|---|---|
-| B-001 | Cart still shows purchased items until restart | Client state not refreshed + full-cart delete assumptions | Refresh cart after order; backend deletes only purchased selected items |
-| B-002 | Cannot choose specific cart items for payment | No selection model in cart UI/API | Added per-item selection + `selectedProductIds` checkout payload |
-| B-003 | Product history image broken | History card used missing `imageUrl` | Added image fallback and emoji placeholder |
-| B-004 | ESLint hook error in CartPage | Hook called conditionally after early return | Reordered logic and removed conditional hook use |
-| B-005 | Startup script output garbled | Non-ASCII console text in mixed encoding terminals | Converted runtime output to plain English ASCII |
-| B-006 | Proxy/network startup issues | localhost-bound dev settings | Host binding and API URL wiring updated in scripts |
+Here are the bug reports:
+
+* **B-001**.
+
+Bug: Cart kept showing purchased items until app restart.
+
+Root Cause: Client state not refreshed; backend was deleting all cart items instead of only the selected ones.
+
+Fix: Added `fetchCart()` call after order creation. Backend now deletes only purchased items.
+
+* **B-002**
+
+Bug: You cannot choose which items in your cart to pay for.
+
++ Root Cause: The cart user interface and application programming interface do not have a way to select items.
+
+Fix: We added a way to select each item and a list of the selected product ids to the checkout.
+
+* **B-003**
+
+Bug: The picture of a product in the history is broken.
+
++ Root Cause: The history card is missing the image url.
+
+Fix: We added a default image and an emoji to use when the real image is missing.
+
+* **B-004**
+
++ Bug: There is an error in the CartPage because of an ESLint hook.
+
+Root Cause: The hook is being called after the function has already returned.
+
+Fix: We changed the logic and removed the conditional use of the hook.
+
+* **B-005**
+
+Bug: Startup script output garbled on Windows.
+
+Root Cause: Mixed encoding with non-ASCII (CJK) characters in PowerShell.
+
+Fix: Replaced all Chinese strings with English ASCII in `start_all.ps1`.
+
+* **B-006**
+
+Bug: There are problems with the proxy and network when starting up.
+
++ Root Cause: The development settings are set to work on localhost.
+
+Fix: We updated the host binding and API URL in the scripts.
 
 ---
 
 ## 12) Version Control History (Git)
 
-Full commit history showing staged project evolution from initial baseline to final delivery:
+Here is the history of our commits:
 
-| Commit | Date | Author | Description |
-|---|---|---|---|
-| `9ba3f039` | 2026-03-31 | Xinyi Hu | Enhance report with sprint planning and full user stories |
-| `9bd95bcb` | 2026-03-31 | Xinyi Hu | Add user stories and update team roles in report |
-| `7a9362fe` | 2026-03-31 | Xinyi Hu | Update testing section in report with actual test results |
-| `6d035767` | 2026-03-31 | Xinyi Hu | Add automated unit tests (Jest) for recommendation engine and auth helpers |
-| `2efea2d9` | 2026-03-31 | Yutao Zheng | Add documentation |
-| `a312060d` | 2026-03-31 | Yutao Zheng | Merge pull request #2 from feature/yutao-v2 |
-| `69e0a718` | 2026-03-31 | Yutao Zheng | Fix bugs (cart consistency, hook error, image fallback, script encoding) |
-| `a3185563` | 2026-03-31 | Yutao Zheng | Merge pull request #1 from feature/yutao-v2 |
-| `1754d6ff` | 2026-03-31 | Yutao Zheng | Connect services and integration wiring |
-| `f49ea4e3` | 2026-03-31 | Yutao Zheng | Cloud database configuration |
-| `890c01f0` | 2026-03-25 | Yutao Zheng | Add project report |
-| `ede49ad2` | 2026-03-20 | Yutao Zheng | Add browsing activity tracking and local network sharing |
-| `a5eb3fd9` | 2026-03-20 | Yutao Zheng | Add AI model to system |
-| `25e6db68` | 2026-03-18 | Xingchen Liu | Add database and AI-chatbot integration |
-| `23bc1173` | 2026-03-17 | Yutao Zheng | Update ML system |
-| `b2096e99` | 2026-03-15 | Yutao Zheng | Add backend and frontend baseline |
+* **9ba3f039**
 
-Git is used throughout for incremental feature delivery and rollback safety. The repository uses feature branches with pull requests for code integration.
++ Date: 2026-03-31
+
++ Author: Xinyi Hu
+
++ Description: We made the report better by adding sprint planning and full user stories.
+
+`9bd95bcb` 2026-03-31 | Xinyi Hu | I added user stories. Updated the team roles in the report.
+
+`7A9362fe` 2026-03-31 | Xinyi Hu | I updated the testing section in the report with the test results.
+
+`6D035767` 2026-03-31 | Xinyi Hu | I added automated unit tests using Jest for the recommendation engine and authentication helpers.
+
+`2Efea2d9` 2026-03-31 | Yutao Zheng | I added documentation.
+
+`A312060d` | 2026-03-31 | Yutao Zheng | I merged pull request #2 from feature/yutao-v2.
+
+`69E0a718` 2026-03-31 | Yutao Zheng | I fixed bugs including cart consistency, hook error, image fallback and script encoding.
+
+`A3185563` 2026-03-31 | Yutao Zheng | I merged pull request #1 from feature/yutao-v2.
+
+`1754D6ff` 2026-03-31 | Yutao Zheng | I connected services. Did integration wiring.
+
+`F49ea4e3` | 2026-03-31 | Yutao Zheng | I configured the cloud database.
+
+`890C01f0` 2026-03-25 | Yutao Zheng | I added a project report.
+
+`Ede49ad2` 2026-03-20 | Yutao Zheng | I added browsing activity tracking and local network sharing.
+
+`A5eb3fd9` | 2026-03-20 | Yutao Zheng | I added an AI model to the system.
+
+`25E6db68` 2026-03-18 | Xingchen Liu | I integrated the database and AI chatbot.
+
+`23Bc1173` 2026-03-17 | Yutao Zheng | I updated the machine learning system.
+
+`B2096e99` 2026-03-15 | Yutao Zheng | I added the baseline for the backend and frontend.
+
+We used Git for all of our work. The repository uses feature branches. Pull requests to merge code into main.
 
 ---
 
-## 13) Challenges Faced & Lessons Learned
+## 13) Challenges We Faced. What We Learned
 
 ### Challenges
-1. Balancing recommendation quality vs response latency.
-2. Coordinating multi-service startup reliability on local machines.
-3. Handling cross-database joins at application layer.
-4. Maintaining frontend state consistency after checkout transitions.
 
-### Lessons Learned
-- Graceful degradation is essential for AI-augmented systems.
-- Feature flags and caching are practical performance controls.
-- Early observability (`strategy` diagnostics, health endpoints) reduces debugging time.
-- UX consistency (cart/account synchronization) is as important as algorithm quality.
+| # | Challenge | What happened | How we dealt with it |
+|---|-----------|--------------|---------------------|
+| 1 | The bge-m3 adds 200-400ms to each recommendation call | The demo felt slow when the embedding was enabled. | I made the embedding optional so it falls back to rule-scoring when the service is down. |
+| 2 | 4 processes on one laptop caused frequent crashes | Port 8001 was already in use and Qwen ran out of memory on a 16GB RAM laptop. | I wrote `start_all.sh` and `.ps1` with error handling and documented the minimum specs. |
+| 3 | Products are in Mongo and orders are in Postgres with no database join | The cart needed a lookup for each item. | I did an application-level join with checks. Used placeholder values if a product was not found. |
+| 4 | The cart user interface does not update after checkout | There was a bug where purchased items were still visible until the page was refreshed. | I added a GET /cart re-fetch after the POST /orders returns. |
+
+### What We Learned
+
+| Lesson | Evidence |
+|--------|----------|
+| Design for AI service failure from the start. | The embedding service crashed during the demo. The fallback kept the recommendations working. |
+| Show diagnostics in API responses. | The `strategy` field in the `/api/recommendations` response shows which stages ran. It saved us hours of debugging. |
+| Frontend state synchronization is harder than backend logic. | The cart and checkout and account consistency took time to debug than the ranker formula. |
 
 ---
 
 ## 14) Future Enhancements
-1. Expand automated test coverage beyond current 52 unit tests (API integration tests, E2E tests).
-2. Offline precomputation for AI tag enrichment to reduce online latency.
-3. A/B testing framework for recommendation strategies.
-4. Production deployment with HTTPS, reverse proxy, and monitoring dashboard.
-5. Better analytics (CTR, conversion uplift, recommendation attribution).
-6. Role-based admin panel for product/promo/recommendation tuning.
+
+| Priority | Enhancement | Reason |
+|----------|------------|--------|
+| High | API integration tests and end-to-end smoke tests | Our current 52 tests only cover the logic and the B-001 bug would have been caught earlier with API-level tests. |
+| High | Offline batch tag extraction | On-demand Qwen calls add latency but pre-computed tags can be cached. |
+| Medium | A/B test for rule-only versus rule-plus-embedding | We do not have data yet on whether the embedding blend improves the click-through rate. |
+| Medium | HTTPS and reverse proxy and monitoring | This is required for any deployment beyond the demo. |
+| Low | Admin panel for products and promotions | Currently it requires direct database edits to add products or change promo codes. |
 
 ---
 
 ## 15) Final Deliverable Checklist
-- [x] Working software with core shopping + recommendation features
-- [x] Modular full-stack architecture
-- [x] Documentation for setup/DB/recommendation architecture
-- [x] Version-controlled development history
-- [x] Integration test evidence from end-to-end scenarios
-- [x] Automated unit test suite (52 tests, 3 suites, Jest)
-- [x] UML and ER diagrams included as Mermaid in report (Class, Sequence, Activity, ER)
+
+* Working software with core shopping and recommendation features
+
+* Modular full-stack architecture
+
+* Documentation for setup and database and recommendation architecture
+
+* Version-controlled development history
+
+* Integration test evidence from end-to-end scenarios
+
+* Automated unit test suite with 52 tests and 3 suites using Jest
+
+* UML and ER diagrams included as Mermaid in the report
 
 ---
 
-## Appendix A: UI Wireframes / Mockups
+## Appendix A: User Interface Wireframes
 
-The following wireframe outlines the key pages and navigation flow of the application:
+The following wireframe shows the pages and navigation flow of the application:
 
 ```mermaid
 flowchart LR
@@ -555,9 +909,12 @@ flowchart LR
     Home --> Chat
 ```
 
-Early static mock pages existed under legacy `UI/` prototype. Final implementation uses React pages matching the wireframe layout above.
+We had mock pages under the legacy `prototype` directory. The final implementation uses React pages that match the wireframe layout.
 
-## Appendix B: Assumptions for Demo Environment
-- Same LAN/hotspot network for multi-device access.
-- Ports 3000/5000/8001/8002 available.
-- Databases and models already initialized.
+## Appendix B: Assumptions for the Demo Environment
+
+* The devices are, on the local area network or hotspot.
+
+* Ports 3000 5000 8001 and 8002 are available.
+
+* The databases and models are already initialized.
