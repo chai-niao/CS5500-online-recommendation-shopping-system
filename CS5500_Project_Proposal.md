@@ -11,11 +11,11 @@ Client Name: Mengqiu Liu
 Academic Year: 2026 Spring  
 Supervisor Name: Sarita Singh
 
-## **1\. Introduction 加入citation**
+## **1\. Introduction **
 
 With the rapid growth of e-commerce and omnichannel retail, customers increasingly expect personalized, convenient, and intelligent shopping experiences \[1\]. Traditional hypermarket systems rely heavily on manual browsing and generic promotions, which often fail to meet individual customer needs \[2\]. Advances in artificial intelligence, data analytics, and cloud-based web technologies enable the development of systems that can personalize product discovery, recommendations, and customer interaction while integrating both online and in-store experiences \[3\]. This project focuses on designing a web-based intelligent personalized shopping system that enhances customer engagement and operational efficiency for hypermarkets \[4\].
 
-## **2\. Problem Statement 加入citation**
+## **2\. Problem Statement**
 
 Current hypermarket shopping systems provide limited personalization and weak integration between online and offline channels \[5\]. Customers often struggle to find relevant products efficiently, especially during seasonal or festival periods \[6\]. Existing systems also lack intelligent assistance for quick queries and shopping list management \[7\]. These limitations lead to reduced customer satisfaction and missed sales opportunities \[8\]. There is a need for an ethical, AI-driven personalized shopping recommendation system that improves product discovery, supports customer interaction \[9\], and seamlessly integrates digital and physical retail environments \[10\].
 
