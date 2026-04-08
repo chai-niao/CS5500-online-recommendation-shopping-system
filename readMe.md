@@ -83,8 +83,10 @@ CS5500-online-recommendation-shopping-system/
 │   │       ├── lists.js               # Shopping lists + in-store sync
 │   │       └── chat.js                # OpenAI chatbot
 │   ├── ml-services/
-│   │   ├── embedding_service.py       # BAAI/bge-m3 service (port 8001)
-│   │   ├── tag_extraction_service.py  # Qwen2.5-7B service (port 8002)
+│   │   ├── README.md                          # Setup, model download, troubleshooting
+│   │   ├── embedding_service.py               # BAAI/bge-m3 service (port 8001)
+│   │   ├── tag_extraction_service.py          # Qwen2.5-7B service (port 8002)
+│   │   ├── requirements-embedding-service.txt
 │   │   ├── requirements-tag-service.txt
 │   │   ├── run_embedding_service.ps1
 │   │   └── run_tag_service.ps1
@@ -163,8 +165,9 @@ For the in-depth walkthrough see [`docs/setup-guide.md`](docs/setup-guide.md).
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
-# Edit backend/.env to set DB credentials, JWT_SECRET, OPENAI_API_KEY (optional)
 ```
+
+> **Before running `npm run seed:all`:** open `backend/.env` and replace the placeholder values `DB_PASSWORD=replace_with_db_password` and `JWT_SECRET=replace_with_strong_secret` with real values. `OPENAI_API_KEY` is optional — the chatbot falls back to a keyword stub when unset. Other defaults (Mongo URI, model paths) can stay as-is for a first local run.
 
 ### 2. Install dependencies
 
