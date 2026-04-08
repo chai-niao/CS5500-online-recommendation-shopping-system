@@ -13,6 +13,7 @@ A full-stack hypermarket web application featuring a hybrid recommendation pipel
 | **Frontend (Vercel)** | https://cs-5500-online-recommendation-shopp.vercel.app/ |
 | **Backend (Render)** | https://cs5500-online-recommendation-shopping-9st7.onrender.com |
 | **Health check** | https://cs5500-online-recommendation-shopping-9st7.onrender.com/api/health |
+| **Project board (GitHub Projects)** | https://github.com/users/123321-xy/projects/1/views/1 |
 | **Demo Account** | `demo@hypermarket.com` / `password123` |
 
 > The Render free tier may cold-start: the first request after a period of inactivity can take ~30 seconds.
@@ -421,15 +422,45 @@ Supports `?q=`, `?category=`, `?featured=true` query params.
 
 ## Testing
 
+The backend ships with an automated **Jest** test suite. All tests are pure unit tests
+— they import the relevant modules directly and do not require PostgreSQL, MongoDB, or
+any network service to be running, so they execute in a few seconds on a clean clone.
+
+### Running the tests
+
 ```bash
 cd backend
+npm install      # first time only — installs jest as a devDependency
 npm test
 ```
 
-Current test files (Jest):
-- `__tests__/authHelpers.test.js`
-- `__tests__/ranker.test.js`
-- `__tests__/tagSystem.test.js`
+Expected output (abridged):
+
+```
+PASS  __tests__/authHelpers.test.js
+PASS  __tests__/ranker.test.js
+PASS  __tests__/tagSystem.test.js
+
+Test Suites: 3 passed, 3 total
+Tests:       52 passed, 52 total
+```
+
+### Coverage by file
+
+| Suite | File | # tests | What it covers |
+|---|---|---:|---|
+| Auth helpers | `__tests__/authHelpers.test.js` | **5** | `mapUserRow` / `mapAddressRow` from `routes/auth.js` — converts snake_case PostgreSQL rows into camelCase API objects, defaults nullable arrays to `[]`, and verifies the `password` hash is **never** included in serialized output (security regression guard). |
+| Recommendation ranker | `__tests__/ranker.test.js` | **16** | The 6-factor weighted formula in `recommendation/ranker.js`: shape of the result (`ranked` + `weights` + `scoreBreakdown`), each component score (`tagScore`, `popularityScore`, `ratingScore`, `featuredScore`, `priceScore`, `freshnessScore`), embedding-blend behavior with and without embeddings, descending sort guarantee, default weights when env vars are unset, and edge cases (empty list, single product, freshness cap at 1, rating-to-score conversion, price affinity by user dietary preference). |
+| Tag system | `__tests__/tagSystem.test.js` | **31** | The full tag pipeline in `recommendation/tagSystem.js`: the static `TAG_TAXONOMY` (categories, dietary, festivals), `inferProductTags` (category → tag, dietary tags, festival tags, price band, occasion band, missing-field tolerance, deduplication, synonym resolution), `buildUserTagProfile` (dietary + cultural mapping, empty/missing-field tolerance, synonyms), `tagOverlapScore` (perfect / partial / zero overlap, empty inputs, default args), and `extractCandidateTagsHeuristic` (the deterministic fallback used when the Qwen tag service is unavailable). |
+| | | **52** | |
+
+### Scope and known gaps
+
+- ✅ **Unit tests** for the recommendation ranking pipeline and the auth-row mapping helpers — the two areas with the most pure logic.
+- ❌ **No automated integration tests** (no `supertest` HTTP-level tests against Express). Integration scenarios — login → browse → add to cart → checkout → order history → recommendations — are validated **manually** before each release; the manual checklist is documented in `report.md` §10.3.
+- ❌ **No frontend tests** in `frontend/` (no React Testing Library / Jest setup on the React side).
+- ❌ **No end-to-end (E2E) tests** (no Cypress / Playwright).
+
 
 ---
 
