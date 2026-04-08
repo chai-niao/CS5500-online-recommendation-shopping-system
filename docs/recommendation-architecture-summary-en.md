@@ -103,15 +103,15 @@ Collection: `user_activity_logs` (MongoDB)
 ---
 
 ## 5) Runtime and Operations
-- Unified startup script: `start_all.ps1`
+- Unified startup script: `start_all.ps1` (Windows) / `start_all.sh` (macOS/Linux)
   - Starts embedding service (8001)
   - Starts tag extraction service (8002)
   - Starts backend (5000)
   - Starts frontend (3000)
-- Unified stop script: `stop_all.ps1`
+- Unified stop script: `stop_all.ps1` (Windows) / `stop_all.sh` (macOS/Linux)
   - Stops services on ports 3000/5000/8001/8002
 
-Model runtime is based on local Python services and local project model directories (no Ollama dependency required).
+Model runtime is based on local Python services and local project model directories.
 
 ---
 

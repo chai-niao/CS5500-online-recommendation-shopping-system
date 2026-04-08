@@ -1,5 +1,7 @@
 # Continuous Integration (CI) Pipeline and Deployment on Render.com
 
+> Status: Backend is currently deployed on Render following the model described in this document.
+
 ## 1. Objective
 This document describes a practical CI/CD pipeline for the CS5500 AI Hypermarket project and explains how to deploy the backend service on Render.com.
 
@@ -48,7 +50,7 @@ A typical pipeline contains the following stages:
 
 ## 4. Example GitHub Actions Workflow
 
-Use `.github/workflows/ci.yml`:
+Reference template (not currently configured in the repo — planned for future setup). Save as `.github/workflows/ci.yml`:
 
 ```yaml
 name: CI

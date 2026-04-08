@@ -110,6 +110,7 @@ npm run seed:all
 # Or seed them separately
 npm run seed:pg      # PostgreSQL: users, orders, carts, lists, festivals, promotions
 npm run seed:mongo   # MongoDB: 24 products with location data, indexes, chat/log collections
+npm run seed:demo    # Optional: adds synthetic users & products for recommendation testing
 ```
 
 **Expected output:**
@@ -237,7 +238,7 @@ backend/
 │   ├── middleware/
 │   │   ├── auth.js               # JWT auth
 │   │   └── errorHandler.js       # Error handler
-│   ├── recommendation/           # Recommendation engine (unchanged)
+│   ├── recommendation/           # Hybrid ranking + collaborative filtering
 │   └── routes/
 │       ├── auth.js               # Login/Register → PG
 │       ├── products.js           # Products → MongoDB
@@ -259,8 +260,10 @@ frontend/
 └── ...
 
 docs/
-├── database-schema.md            # Full schema documentation
-└── setup-guide.md                # This file
+├── database-schema.md                        # Full schema documentation
+├── setup-guide.md                            # This file
+├── recommendation-architecture-summary-en.md # Recommendation pipeline overview
+└── ci-pipeline-render.md                     # CI/CD + Render deployment notes
 ```
 
 ---
@@ -288,4 +291,5 @@ npm run dev        # Start with nodemon (auto-restart on changes)
 npm run seed:pg    # Reset & seed PostgreSQL
 npm run seed:mongo # Reset & seed MongoDB
 npm run seed:all   # Reset & seed both databases
+npm run seed:demo  # Add synthetic demo users/products (optional, for recommendation testing)
 ```
