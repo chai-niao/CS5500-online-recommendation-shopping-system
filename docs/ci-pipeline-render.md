@@ -1,9 +1,13 @@
-# Continuous Integration (CI) Pipeline and Deployment on Render.com
+# Continuous Integration (CI) Pipeline and Deployment
 
-> Status: Backend is currently deployed on Render following the model described in this document.
+> **Status (live):**
+> - **Backend** is deployed on Render: <https://cs5500-online-recommendation-shopping-9st7.onrender.com>
+>   (health: `/api/health`, currently reporting `postgres: up` and `mongo: up`)
+> - **Frontend** is deployed on Vercel: <https://cs-5500-online-recommendation-shopp.vercel.app/>
+> - PostgreSQL is hosted on Neon; MongoDB is hosted on MongoDB Atlas.
 
 ## 1. Objective
-This document describes a practical CI/CD pipeline for the CS5500 AI Hypermarket project and explains how to deploy the backend service on Render.com.
+This document describes a practical CI/CD pipeline for the CS5500 AI Hypermarket project and explains how the backend service is deployed on Render.com and the frontend on Vercel.
 
 ---
 
@@ -131,11 +135,37 @@ Optional reliability variable:
 ### 5.4 Health Verification
 After deployment, verify:
 
-- `GET /api/health`
+- `GET /api/health` on the Render service URL
+  (current live instance: <https://cs5500-online-recommendation-shopping-9st7.onrender.com/api/health>)
 - Expected:
   - `status: ok`
   - `services.postgres: up`
   - `services.mongo: up`
+
+> **Cold start note:** The Render free tier spins the service down after inactivity; the first request can take ~30 s while it warms up.
+
+---
+
+## 5b. Deploying Frontend on Vercel
+
+The React frontend is deployed as a static SPA on Vercel.
+
+### 5b.1 Project setup
+1. Import the GitHub repository in the Vercel dashboard.
+2. **Root Directory**: `frontend`
+3. **Framework Preset**: Create React App
+4. Build command: `npm run build` (default)
+5. Output directory: `build` (default)
+
+### 5b.2 Required environment variables
+Set in the Vercel project settings (Production):
+
+- `REACT_APP_API_URL=https://cs5500-online-recommendation-shopping-9st7.onrender.com/api`
+
+> Because Create React App inlines `REACT_APP_*` variables at build time, changing this value requires a redeploy on Vercel.
+
+### 5b.3 CORS coupling
+The Render backend's `CORS_ORIGINS` env var **must** include the Vercel domain (e.g. `https://cs-5500-online-recommendation-shopp.vercel.app`), otherwise the browser will reject API calls.
 
 ---
 
