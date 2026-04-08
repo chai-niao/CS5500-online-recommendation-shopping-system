@@ -209,16 +209,18 @@ Open: `http://localhost:3000`
 These are **optional** and only needed for the embedding-based recommendation features.
 
 ```bash
-# Embedding service (BAAI/bge-m3) — port 8001
 cd backend/ml-services
-pip install -r requirements-tag-service.txt
+
+# Embedding service (BAAI/bge-m3) — port 8001
+pip install -r requirements-embedding-service.txt
 python embedding_service.py
 
 # Tag extraction service (Qwen2.5-7B) — port 8002
+pip install -r requirements-tag-service.txt
 python tag_extraction_service.py
 ```
 
-> Models must be downloaded locally first. See `readMe.md` for model directory paths.
+> Models must be downloaded locally first. See [`backend/ml-services/README.md`](../backend/ml-services/README.md) for model download commands, venv setup, and troubleshooting (including the common `modelReady: false` symptoms).
 
 ---
 
