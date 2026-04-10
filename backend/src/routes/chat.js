@@ -17,6 +17,16 @@ function getOpenAI() {
 }
 
 const MAX_PRODUCTS_IN_PROMPT = parseInt(process.env.CHAT_PROMPT_PRODUCT_LIMIT || '15', 10);
+const MAX_HISTORY_MESSAGES = parseInt(process.env.CHAT_HISTORY_MAX_MESSAGES || '12', 10);
+const MAX_USER_MESSAGE_LENGTH = parseInt(process.env.CHAT_USER_MESSAGE_MAX_CHARS || '1200', 10);
+
+function sanitizeConversationHistory(conversationHistory = []) {
+  if (!Array.isArray(conversationHistory)) return [];
+  return conversationHistory
+    .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_USER_MESSAGE_LENGTH) }))
+    .slice(-MAX_HISTORY_MESSAGES);
+}
 
 async function getRelevantProductsForPrompt(userMessage) {
   const db = tryGetDb();
@@ -138,11 +148,14 @@ router.post('/message', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Message is required' });
     }
 
+    const trimmedMessage = String(message).trim().slice(0, MAX_USER_MESSAGE_LENGTH);
+    const safeHistory = sanitizeConversationHistory(conversationHistory);
+
     const client = getOpenAI();
 
     // If OpenAI is not configured, fall back to stub
     if (!client) {
-      const stubReply = generateStubReply(message);
+      const stubReply = generateStubReply(trimmedMessage);
       return res.json({
         reply: stubReply,
         timestamp: new Date().toISOString(),
@@ -151,18 +164,18 @@ router.post('/message', authMiddleware, async (req, res) => {
     }
 
     // Build system prompt with bounded and relevant context
-    const systemPrompt = await buildSystemPrompt(req.user.id, message);
+    const systemPrompt = await buildSystemPrompt(req.user.id, trimmedMessage);
 
     // Call OpenAI
     const completion = await client.chat.completions.create({
       model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
-        ...conversationHistory,
-        { role: 'user', content: message },
+        ...safeHistory,
+        { role: 'user', content: trimmedMessage },
       ],
-      max_tokens: 500,
-      temperature: 0.7,
+      max_tokens: parseInt(process.env.CHAT_MAX_TOKENS || '500', 10),
+      temperature: parseFloat(process.env.CHAT_TEMPERATURE || '0.7'),
     });
 
     const reply = completion.choices[0].message.content;
@@ -178,7 +191,7 @@ router.post('/message', authMiddleware, async (req, res) => {
             $push: {
               messages: {
                 $each: [
-                  { role: 'user', content: message, timestamp: new Date() },
+                  { role: 'user', content: trimmedMessage, timestamp: new Date() },
                   { role: 'assistant', content: reply, timestamp: new Date() },
                 ],
               },
