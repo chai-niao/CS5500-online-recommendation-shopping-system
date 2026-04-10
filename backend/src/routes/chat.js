@@ -77,9 +77,8 @@ async function getRelevantProductsForPrompt(userMessage) {
   return col.find({ featured: true }).limit(MAX_PRODUCTS_IN_PROMPT).toArray();
 }
 
-// Build dynamic system prompt with relevant products, user orders, and promotions
+
 async function buildSystemPrompt(userId, userMessage) {
-  // 1. Fetch relevant products (bounded for token safety)
   const products = await getRelevantProductsForPrompt(userMessage);
   const productLines = products.map(p => {
     const loc = p.location
@@ -89,7 +88,24 @@ async function buildSystemPrompt(userId, userMessage) {
     return `- ${p.name} (${p.id}) | $${p.price} | Category: ${p.category} | ${loc} | ${dietary} | Stock: ${p.stock}`;
   }).join('\n');
 
-  // 2. Fetch user's recent orders
+  let userProfileInfo = 'No user profile available.';
+  if (userId) {
+    const userResult = await pool.query(
+      'SELECT name, age_range, preferred_language, cultural_interests, dietary_preferences FROM users WHERE id = $1 LIMIT 1',
+      [userId]
+    );
+    if (userResult.rows.length > 0) {
+      const u = userResult.rows[0];
+      const cultural = Array.isArray(u.cultural_interests) && u.cultural_interests.length > 0
+        ? u.cultural_interests.join(', ')
+        : 'None';
+      const dietary = Array.isArray(u.dietary_preferences) && u.dietary_preferences.length > 0
+        ? u.dietary_preferences.join(', ')
+        : 'None';
+      userProfileInfo = `- Name: ${u.name || 'N/A'}\n- Age range: ${u.age_range || 'N/A'}\n- Preferred language: ${u.preferred_language || 'English'}\n- Cultural interests: ${cultural}\n- Dietary preferences: ${dietary}`;
+    }
+  }
+
   let orderInfo = 'No recent orders.';
   if (userId) {
     const ordersResult = await pool.query(
@@ -106,7 +122,6 @@ async function buildSystemPrompt(userId, userMessage) {
     }
   }
 
-  // 3. Fetch active promotions
   const promosResult = await pool.query('SELECT * FROM promotions WHERE active = true LIMIT 10');
   const promoLines = promosResult.rows.map(p =>
     `- Code: ${p.code} | ${p.description} | Min order: $${p.min_order}`
@@ -126,8 +141,12 @@ IMPORTANT RULES:
 - When asked about product locations, ALWAYS provide the specific aisle number, section letter, shelf number, and zone.
 - Format locations as: "Aisle [number], Section [letter], Shelf [number] in the [Zone] Zone"
 - When asked about allergens or dietary info, check the product's dietaryInfo field.
+- Prefer suggestions aligned with customer's dietary preferences and cultural interests.
 - Be friendly, concise, and helpful.
 - If you don't know something, say so honestly.
+
+CUSTOMER PROFILE PREFERENCES:
+${userProfileInfo}
 
 RELEVANT PRODUCT CONTEXT (TOP ${MAX_PRODUCTS_IN_PROMPT}):
 ${productLines}
